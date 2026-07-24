@@ -3,60 +3,48 @@
 > **Status: RESOLVED (`JN-D1`).** This document is the canonical specification of
 > the `jira_nano` status/workflow model. It supersedes the earlier draft.
 
-## Goal
+## Principles
 
-A **configurable** workflow: a set of states and the allowed transitions between
-them, defined in a versioned config file, validated by the service layer on every
-mutation, and mirrored to Telegram. Terminal states close/archive a ticket.
+- **Jira-conventional.** The model follows established Jira workflow conventions;
+  it does not invent bespoke mechanics.
+- **Fully user-configurable.** States, transitions, guards, git-host event
+  mappings, and icons/colors are all defined in a config file. The set below is
+  only the built-in **default** — a user may replace it entirely (e.g. add a
+  `blocked` or `qa` state).
+- **Strictly enforced.** Once configured, the workflow is a strict state machine.
+  Only transitions declared in the config are legal; any other transition is
+  rejected. **There is no force/override bypass** — the configured state machine
+  is always honored.
 
-## States
+## Default states
 
 | State | Meaning | Icon | Telegram topic color | Terminal? |
 |-------|---------|------|----------------------|-----------|
-| `backlog` | Captured, deprioritized | 🗒️ | blue | no |
 | `todo` | Ready to start | 📋 | yellow | no |
 | `in-progress` | Being worked on | 🔧 | purple | no |
 | `in-review` | Under review (e.g. MR/PR open) | 👀 | pink | no |
 | `done` | Completed and verified | ✅ | green | yes (completed) |
 | `archived` | Closed without completion | 📦 | red | yes (archived) |
 
-- **Initial state:** `create` produces a ticket in `todo` — new tickets are
-  immediately ready to start, with no separate planning step. `backlog` is
-  reachable by moving a `todo` ticket back down when it is deprioritized.
-- The six Telegram topic colors map 1:1 onto the six states (see §Telegram
-  rendering).
+- **Initial state:** `create` produces a ticket in `todo`.
+- Each state binds to one of the six native Telegram forum-topic colors (see
+  §Telegram rendering).
 
-## Transitions
+## Default transitions
 
 ```
-todo        → in-progress | backlog | archived
-backlog     → todo | archived
+todo        → in-progress | archived
 in-progress → in-review | todo | archived
 in-review   → done | in-progress | archived
 done        → todo        (reopen)
-archived    → backlog     (revive)
+archived    → todo        (revive)
 ```
 
 - **Initial:** `todo`.
 - Any non-terminal state may move to `archived`.
 - Terminal states are **reopenable** via the explicit transitions above:
-  `done → todo` (reopen) and `archived → backlog` (revive). Git history records
-  the reopen; no separate flag is needed.
-
-## `blocked` is a flag, not a state
-
-"Blocked" is **orthogonal** to pipeline position: a ticket can be blocked while
-`in-progress` or `in-review`. Modeling it as a state would lose the "where in the
-pipeline were we" information on unblock. It is therefore a frontmatter flag, not
-a workflow state:
-
-```yaml
-blocked: true
-blocked_reason: "waiting on JN-42"
-```
-
-`status` always reflects true pipeline position; `blocked` is a separate axis
-rendered as a 🚫 overlay in Telegram.
+  `done → todo` (reopen) and `archived → todo` (revive). Git history records the
+  reopen; no separate flag is needed.
 
 ## Terminal semantics: `done` vs `archived`
 
@@ -69,8 +57,8 @@ board columns and Telegram colors unambiguous.
 
 ## Transition guards
 
-A guard is a precondition without which a transition is rejected. The default
-workflow ships **one** guard:
+A guard is a precondition without which a transition is rejected (a Jira-style
+transition validator). The default workflow ships **one** guard:
 
 - `in-progress` requires an `assignee` — you cannot start work with nobody
   assigned.
@@ -82,8 +70,9 @@ discussion, manual checks) is not blocked.
 ## Git-host event → transition map
 
 Events name a **target status**; the service advances the ticket **forward along
-the legal transition path** to reach it, never skipping states. Backward moves
-happen only via explicit events. Default map (symmetric across GitLab/GitHub):
+the legal transition path** to reach it, never performing an illegal jump.
+Backward moves happen only via explicit events. Default map (symmetric across
+GitLab/GitHub):
 
 | Event | Target |
 |-------|--------|
@@ -92,27 +81,31 @@ happen only via explicit events. Default map (symmetric across GitLab/GitHub):
 | `mr_closed` / `pr_closed` (unmerged) | `in-progress` |
 
 - **Forward auto-advance.** If an event targets `in-review` on a `todo` ticket,
-  the service walks `todo → in-progress → in-review` (all legal) rather than
+  the service walks `todo → in-progress → in-review` (each step legal) rather than
   jumping or stalling. If the target is unreachable by a forward legal path from
-  the current state, the event is **skipped and a note is posted** to the ticket.
+  the current state, the event is **skipped and a note is posted** to the ticket
+  — never forced.
 - **Guard interaction.** When forward auto-advance would cross the `in-progress`
   assignee guard on an unassigned ticket, the service **auto-assigns the MR/PR
   author** (the person actually doing the work) so the guard is satisfied
-  naturally. The map itself is configurable.
+  legally. The map itself is configurable.
 
-## Validation strictness
+## Validation
 
-- **Strict by default.** An illegal transition is a **hard error**.
-- **Force override.** A caller may pass `force=true` to perform the transition
-  anyway; the service records an explicit note in the commit message. Git is the
-  audit trail, so a forced transition is fully traceable.
+- **Strict, no exceptions.** An illegal transition (one not declared in the
+  configured `transitions`, or one failing a `guard`) is a **hard error**.
+- **No force override.** There is no bypass; callers cannot perform an
+  undeclared transition. Git history (one commit per transition, with a
+  Conventional-Commit message referencing the ticket id) is the audit trail.
 
 ## Configuration
 
-- The default workflow is **built in**.
+- The default workflow is **built in** but is **only a default**.
 - It is overridable **per repository** via `.jira_nano/workflow.yaml` in the
   ticket-store repo — versioned like everything else, so the workflow definition
   is itself part of the audit trail. One workflow per repository/project.
+- A user may redefine the full set of states (including adding states such as
+  `blocked` or `qa`), transitions, guards, event mappings, and icons/colors.
 
 ### Config shape
 
@@ -120,19 +113,17 @@ happen only via explicit events. Default map (symmetric across GitLab/GitHub):
 workflow:
   initial: todo
   states:
-    - {name: backlog,     icon: "🗒️", color: blue}
     - {name: todo,        icon: "📋", color: yellow}
     - {name: in-progress, icon: "🔧", color: purple}
     - {name: in-review,   icon: "👀", color: pink}
     - {name: done,        icon: "✅", color: green}
     - {name: archived,    icon: "📦", color: red}
   transitions:
-    todo:        [in-progress, backlog, archived]
-    backlog:     [todo, archived]
+    todo:        [in-progress, archived]
     in-progress: [in-review, todo, archived]
     in-review:   [done, in-progress, archived]
     done:        [todo]        # reopen
-    archived:    [backlog]     # revive
+    archived:    [todo]        # revive
   terminal: [done, archived]
   guards:
     in-progress: {require: [assignee]}
@@ -146,22 +137,22 @@ workflow:
 ```
 
 The service layer loads this once. Every `transition` call is validated against
-`transitions[current]` (and any `guards[target]`) before writing to Git.
+`transitions[current]` (and any `guards[target]`) before writing to Git; nothing
+else is permitted.
 
 ## Telegram rendering
 
 - **Topic color** is taken from `state.color`. The Bot API exposes exactly six
-  native forum-topic colors, which the six states use directly — always
+  native forum-topic colors, so each state binds directly to one — always
   available, no special stickers required.
 - **State icon** (emoji) is rendered as a prefix in the topic title and in update
   posts.
-- **`blocked`** adds a 🚫 overlay to the title/posts.
 - Note: arbitrary emoji as a *native topic icon* is **not** reliably available
   (the Bot API limits topic icons to `getForumTopicIconStickers`), so color +
   in-text emoji is the mechanism rather than custom native icons.
 
 ## Impact on the ticket schema (`JN-D3`)
 
-This decision introduces three frontmatter fields consumed by the workflow —
-`blocked` (bool), `blocked_reason` (string), and `resolution` (enum, on
-`archived`). The full frontmatter schema remains open under `JN-D3`.
+This decision introduces one frontmatter field consumed by the workflow —
+`resolution` (enum, set on `archived`). The full frontmatter schema remains open
+under `JN-D3`.
