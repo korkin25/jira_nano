@@ -90,22 +90,34 @@ jobs:
         continue-on-error: true
         run: pipx run semgrep scan --config p/python --config p/security-audit --error --skip-unknown-extensions
 
-  iac-scan:
-    name: IaC scan (checkov/hadolint/trivy)
+  checkov:
+    name: Checkov (IaC misconfig)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Hadolint (Dockerfile)
-        run: docker run --rm -i hadolint/hadolint:latest hadolint - < Dockerfile || true
       - name: Checkov (Dockerfile / GitHub Actions / secrets)
         continue-on-error: true
         run: |
           pip install checkov
           checkov -d . --framework dockerfile,github_actions,secrets --soft-fail --quiet
-      - name: Trivy (config misconfig — Dockerfile/compose/helm/k8s)
+
+  hadolint:
+    name: Hadolint (Dockerfile)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Hadolint
+        run: docker run --rm -i hadolint/hadolint:latest hadolint - < Dockerfile || true
+
+  trivy-config:
+    name: Trivy (config misconfig)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Trivy (Dockerfile/compose/helm/k8s)
         continue-on-error: true
         run: |
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b "$RUNNER_TEMP/bin"
