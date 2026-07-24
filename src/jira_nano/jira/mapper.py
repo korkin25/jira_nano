@@ -2,8 +2,8 @@
 
 Shared by the MCP tools (JN-12) and the HTTP API (JN-13). Supports both dialects:
 v2 (plain-string bodies, username-based users) and v3 (ADF bodies, accountId).
-Field mapping follows ``docs/http-api.md``. Rich Markdown<->ADF conversion arrives
-with JN-31; here v3 bodies use a minimal text ADF.
+Field mapping follows ``docs/http-api.md``; v3 bodies use the Markdown<->ADF
+converter (JN-31).
 """
 from __future__ import annotations
 
@@ -14,6 +14,8 @@ from jira_nano.errors import UnknownHandleError
 from jira_nano.ids import parse_number
 from jira_nano.models import Comment, Ticket
 from jira_nano.users import UserDirectory
+
+from .adf import adf_to_markdown, markdown_to_adf
 
 #: Jira's "Flagged" impediment custom field.
 FLAGGED_FIELD = "customfield_10021"
@@ -43,22 +45,6 @@ _RESOLUTION: dict[str, str] = {
 def _iso_jira(dt: datetime) -> str:
     dt = dt.astimezone(UTC) if dt.tzinfo is not None else dt.replace(tzinfo=UTC)
     return dt.strftime("%Y-%m-%dT%H:%M:%S.000%z")
-
-
-def _text_to_adf(text: str) -> dict[str, Any]:
-    content: list[dict[str, Any]] = []
-    if text:
-        content = [{"type": "paragraph", "content": [{"type": "text", "text": text}]}]
-    return {"type": "doc", "version": 1, "content": content}
-
-
-def _adf_to_text(adf: dict[str, Any]) -> str:
-    parts: list[str] = []
-    for node in adf.get("content", []):
-        for inner in node.get("content", []):
-            if inner.get("type") == "text":
-                parts.append(inner.get("text", ""))
-    return "\n".join(parts)
 
 
 def _user_ref(
@@ -93,7 +79,7 @@ def _comment_json(
         "id": str(comment.id),
         "author": _user_ref(comment.author, version, directory),
         "created": _iso_jira(comment.at),
-        "body": _text_to_adf(comment.body) if version >= 3 else comment.body,
+        "body": markdown_to_adf(comment.body) if version >= 3 else comment.body,
     }
 
 
@@ -105,7 +91,7 @@ def to_jira_issue(
     cat_key, cat_name = _STATUS_CATEGORY[status]
     fields: dict[str, Any] = {
         "summary": ticket.title,
-        "description": _text_to_adf(ticket.description) if version >= 3 else ticket.description,
+        "description": markdown_to_adf(ticket.description) if version >= 3 else ticket.description,
         "issuetype": {"name": _ISSUETYPE[str(ticket.type)]},
         "status": {
             "name": _STATUS_NAME[status],
@@ -135,7 +121,7 @@ def fields_from_jira(fields: dict[str, Any]) -> dict[str, Any]:
         out["title"] = fields["summary"]
     if "description" in fields:
         body = fields["description"]
-        out["description"] = _adf_to_text(body) if isinstance(body, dict) else (body or "")
+        out["description"] = adf_to_markdown(body) if isinstance(body, dict) else (body or "")
     if fields.get("issuetype"):
         out["type"] = _reverse(_ISSUETYPE, fields["issuetype"].get("name"))
     if fields.get("priority"):

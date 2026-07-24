@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `JN-31`: Markdown↔ADF converter (`jira_nano.jira.adf`) — paragraphs, headings,
+  code blocks, bullet/ordered lists, and inline marks (strong/em/code/link); now
+  used by the mapper for v3 bodies.
 - `JN-12`: rounded out the MCP tool surface to match common Jira MCP servers —
   `jira_delete_issue` (→ archive), `jira_batch_create_issues`,
   `jira_get_project_issues`, `jira_edit_comment`, `jira_create_remote_issue_link`,
