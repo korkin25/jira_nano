@@ -2,6 +2,11 @@
 
 ## Current state / next action
 
+**JN-45 done** (2026-07-25): governance docs mirrored with `tg_notes` — `CLAUDE.md` now
+carries the Documentation-sync table, the Testing policy (groups a/b/c, TDD-first, release
+gate) and the extended MANDATORY Per-task lifecycle; features moved to root `Features.md`;
+`docs/tests.md` + `auto-tests/` scaffolds added. In `CHANGELOG.md` (`[Unreleased]`).
+
 **Project initialized:** documentation, rules, and non-code skeleton are in
 place (`CLAUDE.md`, `README.md`, `docs/`, `CHANGELOG.md`, `LICENSE`,
 `.gitignore`, `AGENTS.md`, CI stub). The **Phase 1 package skeleton** is in place
