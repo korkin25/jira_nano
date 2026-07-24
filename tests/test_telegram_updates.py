@@ -2,33 +2,74 @@
 from __future__ import annotations
 
 import asyncio
+from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 import pygit2
 import pytest
 
 from conftest import FakeGateway
 from jira_nano.changefeed import Event
+from jira_nano.config import DEFAULT_WORKFLOW
+from jira_nano.models import Ticket
 from jira_nano.service import TicketService
-from jira_nano.telegram.updates import format_event, post_events
+from jira_nano.telegram.updates import post_events, render_event
+
+_T0 = datetime(2026, 7, 24, 9, 0, 0, tzinfo=UTC)
 
 
-def test_format_event() -> None:
-    jn = "<code>JN-1</code>"  # ticket id is monospace so it is easy to copy
-    assert format_event(Event("status_changed", "JN-1", {"from": "todo", "to": "done"})) == (
-        f"{jn}: status todo → done"
+def _ticket(**over: Any) -> Ticket:
+    data: dict[str, Any] = {
+        "id": "JN-1", "title": "Fix", "reporter": "e", "created": _T0, "updated": _T0,
+    }
+    data.update(over)
+    return Ticket(**data)
+
+
+def _render(ticket: Ticket, event: Event) -> str:
+    return render_event(DEFAULT_WORKFLOW, ticket, event)
+
+
+def test_render_status_changed() -> None:
+    out = _render(
+        _ticket(status="in-review"),
+        Event("status_changed", "JN-1", {"from": "in-progress", "to": "in-review"}),
     )
-    assert format_event(Event("blocked_changed", "JN-1", {"blocked": True})) == f"{jn}: 🚫 blocked"
-    assert format_event(Event("comment_added", "JN-1", {"author": "k", "body": "hi"})) == (
-        f"{jn}: 💬 k: hi"
-    )
-    assert format_event(Event("link_added", "JN-1", {"type": "mr", "url": "u"})) == f"{jn}: 🔗 mr u"
+    assert out == "👀 <b>Fix</b> <code>JN-1</code>\n↳ in-progress → <b>in-review</b>"
 
 
-def test_format_event_escapes_html() -> None:
-    assert format_event(Event("comment_added", "JN-1", {"author": "k", "body": "a < b & c"})) == (
-        "<code>JN-1</code>: 💬 k: a &lt; b &amp; c"
+def test_render_created() -> None:
+    assert _render(_ticket(status="todo"), Event("created", "JN-1", {"status": "todo"})) == (
+        "📋 <b>Fix</b> <code>JN-1</code>\n↳ 🆕 created"
     )
+
+
+def test_render_blocked() -> None:
+    assert _render(_ticket(blocked=True), Event("blocked_changed", "JN-1", {"blocked": True})) == (
+        "📋 <b>Fix</b> <code>JN-1</code>\n↳ 🚫 blocked"
+    )
+
+
+def test_render_comment_uses_blockquote() -> None:
+    assert _render(_ticket(), Event("comment_added", "JN-1", {"author": "k", "body": "hi"})) == (
+        "📋 <b>Fix</b> <code>JN-1</code>\n💬 <b>k</b>:\n<blockquote expandable>hi</blockquote>"
+    )
+
+
+def test_render_link_is_hyperlink() -> None:
+    out = _render(
+        _ticket(), Event("link_added", "JN-1", {"type": "mr", "url": "https://x/1", "ref": "!7"})
+    )
+    assert out == '📋 <b>Fix</b> <code>JN-1</code>\n↳ 🔗 <a href="https://x/1">mr !7</a>'
+
+
+def test_render_escapes_html() -> None:
+    out = _render(
+        _ticket(title="A <b> & c"), Event("comment_added", "JN-1", {"author": "k", "body": "x < y"})
+    )
+    assert "A &lt;b&gt; &amp; c" in out
+    assert "x &lt; y" in out
 
 
 @pytest.fixture
@@ -41,7 +82,7 @@ def test_post_events(service: TicketService, gateway: FakeGateway) -> None:
     t = service.create(title="Fix", reporter="e")
     events = [Event("status_changed", t.id, {"from": "todo", "to": "in-progress"})]
     asyncio.run(post_events(service, gateway, events))
-    assert gateway.posts[-1][1] == "<code>JN-1</code>: status todo → in-progress"
+    assert gateway.posts[-1][1] == "📋 <b>Fix</b> <code>JN-1</code>\n↳ todo → <b>in-progress</b>"
 
 
 def test_post_events_skips_telegram_comments(service: TicketService, gateway: FakeGateway) -> None:
@@ -51,4 +92,6 @@ def test_post_events_skips_telegram_comments(service: TicketService, gateway: Fa
         Event("comment_added", t.id, {"author": "bot", "body": "yo", "source": "mcp"}),
     ]
     asyncio.run(post_events(service, gateway, events))
-    assert [p[1] for p in gateway.posts] == ["<code>JN-1</code>: 💬 bot: yo"]
+    assert [p[1] for p in gateway.posts] == [
+        "📋 <b>Fix</b> <code>JN-1</code>\n💬 <b>bot</b>:\n<blockquote expandable>yo</blockquote>"
+    ]

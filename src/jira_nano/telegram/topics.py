@@ -15,7 +15,7 @@ from jira_nano.config import Workflow
 from jira_nano.models import Link, LinkType, Ticket
 from jira_nano.service import TicketService
 
-from .format import PARSE_MODE
+from .format import PARSE_MODE, esc, ticket_ref
 
 
 class TopicGateway(Protocol):
@@ -58,11 +58,20 @@ def topic_name(ticket: Ticket) -> str:
     return f"{ticket.id}: {ticket.title}"
 
 
+def status_icon(workflow: Workflow, ticket: Ticket) -> str:
+    """The workflow icon for the ticket's current status (empty if none)."""
+    return str(workflow.states.get(str(ticket.status), {}).get("icon", ""))
+
+
 def topic_title(workflow: Workflow, ticket: Ticket) -> str:
     """Topic title reflecting status (icon) + blocked flag (JN-17 / JN-D1)."""
-    icon = workflow.states.get(str(ticket.status), {}).get("icon", "")
     blocked = "🚫" if ticket.blocked else ""
-    return f"{icon}{blocked} {ticket.id}: {ticket.title}".strip()
+    return f"{status_icon(workflow, ticket)}{blocked} {ticket.id}: {ticket.title}".strip()
+
+
+def header(workflow: Workflow, ticket: Ticket) -> str:
+    """Shared HTML message header: status icon + bold title + monospace id."""
+    return f"{status_icon(workflow, ticket)} <b>{esc(ticket.title)}</b> {ticket_ref(ticket.id)}"
 
 
 def topic_color(workflow: Workflow, ticket: Ticket) -> str | None:

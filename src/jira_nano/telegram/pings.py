@@ -11,8 +11,8 @@ from jira_nano.errors import UnknownHandleError
 from jira_nano.service import TicketService
 from jira_nano.users import UserDirectory
 
-from .format import esc, ticket_ref
-from .topics import TopicGateway, ensure_topic
+from .format import esc
+from .topics import TopicGateway, ensure_topic, header
 
 
 async def ping_assignee(
@@ -30,5 +30,5 @@ async def ping_assignee(
     except UnknownHandleError:
         mention = f"@{ticket.assignee}"
     topic_id = await ensure_topic(service, gateway, ticket_id)
-    text = f"{esc(mention)} — assigned {ticket_ref(ticket.id)}: {esc(ticket.title)}"
+    text = f"{header(service.workflow, ticket)}\n↳ 👤 assigned to {esc(mention)}"
     await gateway.post_message(topic_id, text)

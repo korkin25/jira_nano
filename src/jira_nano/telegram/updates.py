@@ -7,29 +7,38 @@ human's own message back at them.
 from __future__ import annotations
 
 from jira_nano.changefeed import Event
+from jira_nano.config import Workflow
+from jira_nano.models import Ticket
 from jira_nano.service import TicketService
 
-from .format import esc, ticket_ref
-from .topics import TopicGateway, ensure_topic
+from .format import esc
+from .topics import TopicGateway, ensure_topic, header
 
 
-def format_event(event: Event) -> str:
-    """Render a change-feed event as an HTML topic message (monospace ticket id)."""
+def render_event(workflow: Workflow, ticket: Ticket, event: Event) -> str:
+    """Render a change-feed event as a formatted HTML topic message.
+
+    Layout: a shared header (status icon + bold title + monospace id) followed by
+    a one-line summary of the change (``↳ …``); comments quote the body.
+    """
     d = event.details
-    tid = ticket_ref(event.ticket_id)
+    head = header(workflow, ticket)
     if event.kind == "created":
-        return f"{tid}: created ({esc(str(d['status']))})"
+        return f"{head}\n↳ 🆕 created"
     if event.kind == "status_changed":
-        return f"{tid}: status {esc(str(d['from']))} → {esc(str(d['to']))}"
+        return f"{head}\n↳ {esc(str(d['from']))} → <b>{esc(str(d['to']))}</b>"
     if event.kind == "assignee_changed":
-        return f"{tid}: assignee → {esc(str(d['to'] or 'unassigned'))}"
+        return f"{head}\n↳ 👤 {esc(str(d['to'])) if d['to'] else 'unassigned'}"
     if event.kind == "blocked_changed":
-        return f"{tid}: {'🚫 blocked' if d['blocked'] else 'unblocked'}"
+        return f"{head}\n↳ {'🚫 blocked' if d['blocked'] else '✅ unblocked'}"
     if event.kind == "comment_added":
-        return f"{tid}: 💬 {esc(str(d['author']))}: {esc(str(d['body']))}"
+        who = esc(str(d["author"]))
+        body = esc(str(d["body"]))
+        return f"{head}\n💬 <b>{who}</b>:\n<blockquote expandable>{body}</blockquote>"
     if event.kind == "link_added":
-        return f"{tid}: 🔗 {esc(str(d['type']))} {esc(str(d['url']))}"
-    return f"{tid}: updated"
+        label = f"{esc(str(d['type']))} {esc(str(d.get('ref') or ''))}".strip()
+        return f'{head}\n↳ 🔗 <a href="{esc(str(d["url"]))}">{label}</a>'
+    return f"{head}\n↳ updated"
 
 
 async def post_events(service: TicketService, gateway: TopicGateway, events: list[Event]) -> None:
@@ -37,5 +46,6 @@ async def post_events(service: TicketService, gateway: TopicGateway, events: lis
     for event in events:
         if event.kind == "comment_added" and event.details.get("source") == "telegram":
             continue
+        ticket = service.get(event.ticket_id)
         topic_id = await ensure_topic(service, gateway, event.ticket_id)
-        await gateway.post_message(topic_id, format_event(event))
+        await gateway.post_message(topic_id, render_event(service.workflow, ticket, event))

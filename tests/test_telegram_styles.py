@@ -13,7 +13,13 @@ from conftest import FakeGateway
 from jira_nano.config import DEFAULT_WORKFLOW
 from jira_nano.models import Ticket
 from jira_nano.service import TicketService
-from jira_nano.telegram.topics import refresh_topic, topic_color, topic_title
+from jira_nano.telegram.topics import (
+    header,
+    refresh_topic,
+    status_icon,
+    topic_color,
+    topic_title,
+)
 
 _T0 = datetime(2026, 7, 24, 9, 0, 0, tzinfo=UTC)
 
@@ -42,6 +48,14 @@ def test_topic_title_blocked() -> None:
 def test_topic_color() -> None:
     assert topic_color(DEFAULT_WORKFLOW, _ticket(status="todo")) == "yellow"
     assert topic_color(DEFAULT_WORKFLOW, _ticket(status="done")) == "green"
+
+
+def test_status_icon() -> None:
+    assert status_icon(DEFAULT_WORKFLOW, _ticket(status="in-review")) == "👀"
+
+
+def test_header_format() -> None:
+    assert header(DEFAULT_WORKFLOW, _ticket()) == "📋 <b>Fix</b> <code>JN-1</code>"
 
 
 @pytest.fixture
