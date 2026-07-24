@@ -46,6 +46,7 @@ API (Phase 2; to discuss before `JN-13`).
 | ID | Decision | Notes |
 |----|----------|-------|
 | JN-D5 | HTTP API Jira compatibility | Make the HTTP API **fully compatible with the Jira REST API** (drop-in for Jira clients). Scope/version TBD — to discuss before `JN-13`. |
+| JN-D6 | MCP tool surface & scope | Draft matrix in `docs/mcp-tools.md` (copies `mcp-atlassian`). Open scope Qs: delete-vs-archive, worklogs, sprints/versions, attachments, naming prefix — resolve before `JN-11`/`JN-12`. |
 
 ## Phase 1 — Core (git ticket store + sqlite cache + CRUD + search)
 
@@ -70,8 +71,8 @@ API (Phase 2; to discuss before `JN-13`).
 |----|--------|------|---------|
 | JN-9 | ⬜ | Shared service API | One layer for all mutations + validation. |
 | JN-10 | ⬜ | Transition validation | Enforce workflow (`JN-D1`) on every mutation. |
-| JN-11 | ⬜ | MCP server | Expose create/update/transition/assign/comment/search/list/board. |
-| JN-12 | ⬜ | Jira-close tool shape | Align tool names/args with common Jira MCP servers. |
+| JN-11 | ⬜ | MCP server | Expose the tool set from `docs/mcp-tools.md` (`JN-D6`). |
+| JN-12 | ⬜ | Jira-close tool shape | Align tool names/args with common Jira MCP servers per `docs/mcp-tools.md` (`JN-D6`). |
 | JN-13 | ⬜ | HTTP API | Same operations for **external** non-MCP clients (internal components use the service layer in-process). Goal: full Jira-REST-API compatibility — scope `JN-D5`. |
 
 ## Phase 3 — Telegram bot mirror
