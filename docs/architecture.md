@@ -140,7 +140,8 @@ A single service layer backs two front doors with the same operation set:
 - **MCP server (ships first — `JN-D4`):** exposes these as MCP tools, with a
   shape kept **close to common Jira MCP servers** so existing AI workflows are
   drop-in. It is the flagship surface, built first to validate the core value and
-  to dogfood (agents manage `jira_nano` tickets over MCP).
+  to dogfood (agents manage `jira_nano` tickets over MCP). Served over **stdio**
+  first, with an optional remote **streamable-HTTP** transport.
 - **HTTP API (follows):** the same operations for **external** non-MCP clients
   (scripts, third-party integrations). A **goal is full compatibility with the
   Jira REST API** so existing Jira clients are drop-in; exact endpoint set and
@@ -149,8 +150,11 @@ A single service layer backs two front doors with the same operation set:
   handlers invoke the service layer **directly**, not via HTTP. A webhook receiver
   listens over HTTP to *receive* events but handles them through the service
   layer, not the public HTTP API.
-- **Thin adapters.** MCP and HTTP hold no logic; all mutation, validation, and
-  Git writes live in the one service layer.
+- **Thin adapters over a shared presentation layer.** MCP and HTTP hold no logic;
+  all mutation, validation, and Git writes live in the one service layer, and a
+  shared presentation layer — a Jira field mapper plus a JQL-subset parser —
+  renders domain objects into Jira JSON for both, so neither adapter duplicates
+  it.
 - **Validation:** every mutating call validates the requested transition against
   the configured workflow (`docs/status-model.md`) before writing to Git.
 

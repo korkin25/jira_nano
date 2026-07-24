@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Refined the Phase 2 plan: split out shared/support modules — Jira field mapper
+  (`JN-33`), JQL subset parser (`JN-30`), Markdown↔ADF converter (`JN-31`), and
+  HTTP auth (`JN-32`) — kept the MCP-before-HTTP order, and added a deferred
+  remote MCP transport task (`JN-34`, streamable-HTTP).
 - Refined the Phase 1 plan: chose **pygit2** for the git store, added a config /
   user-directory loader (`JN-28`) and a background cache-sync watcher (`JN-29`);
   the user directory (`.jira_nano/users.yaml`) is git-backed (source of record)

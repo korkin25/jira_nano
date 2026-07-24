@@ -67,17 +67,26 @@ repository.
 
 ## Phase 2 — MCP + API
 
-> Order (`JN-D4`): **MCP first** (`JN-11`/`JN-12`), then the HTTP API (`JN-13`).
-> Both are thin adapters over the shared service layer (`JN-9`); internal
-> components (bot, git-host handlers) call that layer **in-process**, not via HTTP.
+> **Order:** `JN-9` → `JN-10` → `JN-33` → `JN-30` → `JN-11` → `JN-12` → `JN-31` →
+> `JN-32` → `JN-13`. **MCP ships before HTTP** (`JN-D4`). Adapters are thin: a
+> shared presentation layer — Jira field mapper (`JN-33`) + JQL parser (`JN-30`) —
+> sits between the one service layer and both the MCP and HTTP adapters. Internal
+> components (bot, git-host handlers) call the service layer **in-process**, not
+> via HTTP. `JN-34` (remote MCP transport) is a deferred add-on, off the critical
+> path.
 
 | ID | Status | Task | Details |
 |----|--------|------|---------|
-| JN-9 | ⬜ | Shared service API | One layer for all mutations + validation. |
-| JN-10 | ⬜ | Transition validation | Enforce workflow (`JN-D1`) on every mutation. |
-| JN-11 | ⬜ | MCP server | Expose the tool set from `docs/mcp-tools.md` (`JN-D6`). |
-| JN-12 | ⬜ | Jira-close tool shape | Align tool names/args with common Jira MCP servers per `docs/mcp-tools.md` (`JN-D6`). |
-| JN-13 | ⬜ | HTTP API | Drop-in **Jira REST** (v2 + v3) per `docs/http-api.md` (`JN-D5`); external clients (internal components use the service layer in-process). |
+| JN-9 | ⬜ | Shared service API | Complete the service layer over Phase 1: `assign`, `comment` (add/edit), `watchers` (add/remove/get), `link` (epic `parent` + remote `links[]`); one validated facade, commit-first→cache. |
+| JN-10 | ⬜ | Transition validation | Workflow engine (`JN-D1`): `get_transitions` + strict `transition` (guards, no force) + `set`/`clear_blocked` flag. |
+| JN-33 | ⬜ | Jira issue field mapper | Ticket ↔ Jira issue JSON per `docs/http-api.md` (summary/statusCategory/issuetype/**Flagged**/parent/labels/comments/links; user `name` v2 / `accountId` v3). Shared by MCP + HTTP. |
+| JN-30 | ⬜ | JQL subset parser | Parse the `docs/http-api.md` JQL subset → cache query (`JN-8`). Shared by MCP + HTTP search. |
+| JN-11 | ⬜ | MCP server (stdio) | FastMCP over stdio exposing the `docs/mcp-tools.md` v1 tools; thin adapters over the service; search via `JN-30`, returns via `JN-33`. |
+| JN-12 | ⬜ | Jira-close tool shape | Names/args/returns match `mcp-atlassian` (`docs/mcp-tools.md`); delete→archive; `jira_` prefix; golden conformance. **MCP ships here.** |
+| JN-31 | ⬜ | Markdown↔ADF converter | Convert bodies MD↔ADF for v3 (headings/lists/code/links/emphasis; unknown→text). |
+| JN-32 | ⬜ | HTTP auth | Basic + Bearer PAT + OAuth 2.0 (auth-code + client-credentials); secrets from env. |
+| JN-13 | ⬜ | HTTP API | FastAPI `/rest/api/{2,3}/` (+`latest`→v3) per `docs/http-api.md`; endpoints→service, JQL `JN-30`, bodies `JN-33`(+`JN-31`), auth `JN-32`, Jira error envelope, v2 startAt vs v3 nextPageToken. Ships after MCP. |
+| JN-34 | ⬜ | MCP streamable-HTTP transport | Deferred add-on: expose the MCP server (`JN-11`) over remote streamable-HTTP in addition to stdio. |
 
 ## Phase 3 — Telegram bot mirror
 
