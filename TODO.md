@@ -10,7 +10,8 @@ place (`CLAUDE.md`, `README.md`, `docs/`, `CHANGELOG.md`, `LICENSE`,
 **Implementation is underway** (TDD; a feature branch per task, merged to `main`
 when the suite is green). Done: `JN-1` (models + serialization), `JN-28` (config
 + user directory), `JN-4` (cache schema), `JN-2` (git store), `JN-3` (id
-allocator), `JN-5` (cache rebuild), `JN-6` (incremental upsert). **Next: `JN-29`.**
+allocator), `JN-5` (cache rebuild), `JN-6` (incremental upsert), `JN-29`
+(background cache sync). **Next: `JN-7`.**
 
 **All planning decisions are resolved:**
 
@@ -21,7 +22,7 @@ allocator), `JN-5` (cache rebuild), `JN-6` (incremental upsert). **Next: `JN-29`
 - `JN-D5` — HTTP API = drop-in **Jira REST** (v2 + v3) → `docs/http-api.md`
 - `JN-D6` — MCP tool surface (copies Jira MCP servers) → `docs/mcp-tools.md`
 
-**Next action:** implement **`JN-29`** (background cache sync), TDD.
+**Next action:** implement **`JN-7`** (CRUD service layer), TDD.
 
 ## Legend
 
@@ -45,8 +46,8 @@ allocator), `JN-5` (cache rebuild), `JN-6` (incremental upsert). **Next: `JN-29`
 
 ## Phase 1 — Core (git ticket store + sqlite cache + CRUD + search)
 
-> **Suggested order:** `JN-29` → `JN-7` → `JN-8`.
-> (`JN-1`, `JN-28`, `JN-4`, `JN-2`, `JN-3`, `JN-5`, `JN-6` ✅ done — see
+> **Suggested order:** `JN-7` → `JN-8`.
+> (`JN-1`, `JN-28`, `JN-4`, `JN-2`, `JN-3`, `JN-5`, `JN-6`, `JN-29` ✅ done — see
 > `CHANGELOG.md`.)
 > **Conventions:** **Git is the single source of truth**; the local SQLite cache
 > mirrors everything (tickets + users) for speed and serves **all** reads
@@ -58,7 +59,6 @@ allocator), `JN-5` (cache rebuild), `JN-6` (incremental upsert). **Next: `JN-29`
 
 | ID | Status | Task | Details |
 |----|--------|------|---------|
-| JN-29 | ⬜ | Background cache sync | Detect external git changes (stored HEAD SHA + pygit2 diff) and working-tree edits; refresh the cache incrementally. |
 | JN-7 | ⬜ | CRUD service layer | Single entry, **MCP-first** API: `create` (initial `todo`), `get` (from cache), `update` (fields). Writes commit to Git first, then upsert the cache (`JN-6`). |
 | JN-8 | ⬜ | Search + list + board | Cache-backed `search` (FTS+filters), filtered `list`, `board` grouped by status. |
 
