@@ -10,8 +10,11 @@ place (`CLAUDE.md`, `README.md`, `docs/`, `CHANGELOG.md`, `LICENSE`,
 **Phase 1 (Core) is COMPLETE** — all ten tasks implemented TDD and merged to
 `main`: `JN-1`, `JN-28`, `JN-4`, `JN-2`, `JN-3`, `JN-5`, `JN-6`, `JN-29`, `JN-7`,
 `JN-8` (models, git store, SQLite cache, config/users, CRUD service, cache-backed
-queries, background sync). 66 tests green; ruff + mypy clean. **Next: Phase 2,
-`JN-9`.**
+queries, background sync). 66 tests green; ruff + mypy clean. Released **v0.1.0**;
+CI runs the real suite.
+
+**Phase 2 in progress:** `JN-9` (service API: assign/comment/watchers/link) done.
+**Next: `JN-10`.**
 
 **All planning decisions are resolved:**
 
@@ -22,7 +25,7 @@ queries, background sync). 66 tests green; ruff + mypy clean. **Next: Phase 2,
 - `JN-D5` — HTTP API = drop-in **Jira REST** (v2 + v3) → `docs/http-api.md`
 - `JN-D6` — MCP tool surface (copies Jira MCP servers) → `docs/mcp-tools.md`
 
-**Next action:** start **Phase 2** — implement **`JN-9`** (shared service API), TDD.
+**Next action:** implement **`JN-10`** (workflow engine + transitions), TDD.
 
 ## Legend
 
@@ -46,8 +49,8 @@ queries, background sync). 66 tests green; ruff + mypy clean. **Next: Phase 2,
 
 ## Phase 2 — MCP + API
 
-> **Order:** `JN-9` → `JN-10` → `JN-33` → `JN-30` → `JN-11` → `JN-12` → `JN-31` →
-> `JN-32` → `JN-13`. **MCP ships before HTTP** (`JN-D4`). Adapters are thin: a
+> **Order:** `JN-10` → `JN-33` → `JN-30` → `JN-11` → `JN-12` → `JN-31` → `JN-32`
+> → `JN-13`. (`JN-9` ✅ done.) **MCP ships before HTTP** (`JN-D4`). Adapters are thin: a
 > shared presentation layer — Jira field mapper (`JN-33`) + JQL parser (`JN-30`) —
 > sits between the one service layer and both the MCP and HTTP adapters. Internal
 > components (bot, git-host handlers) call the service layer **in-process**, not
@@ -56,7 +59,6 @@ queries, background sync). 66 tests green; ruff + mypy clean. **Next: Phase 2,
 
 | ID | Status | Task | Details |
 |----|--------|------|---------|
-| JN-9 | ⬜ | Shared service API | Complete the service layer over Phase 1: `assign`, `comment` (add/edit), `watchers` (add/remove/get), `link` (epic `parent` + remote `links[]`); one validated facade, commit-first→cache. |
 | JN-10 | ⬜ | Transition validation | Workflow engine (`JN-D1`): `get_transitions` + strict `transition` (guards, no force) + `set`/`clear_blocked` flag. |
 | JN-33 | ⬜ | Jira issue field mapper | Ticket ↔ Jira issue JSON per `docs/http-api.md` (summary/statusCategory/issuetype/**Flagged**/parent/labels/comments/links; user `name` v2 / `accountId` v3). Shared by MCP + HTTP. |
 | JN-30 | ⬜ | JQL subset parser | Parse the `docs/http-api.md` JQL subset → cache query (`JN-8`). Shared by MCP + HTTP search. |
