@@ -15,12 +15,16 @@ from jira_nano.telegram.topics import ensure_topic, topic_id_of, topic_name
 class FakeGateway:
     def __init__(self) -> None:
         self.calls: list[str] = []
+        self.edits: list[tuple[int, str]] = []
         self._next = 100
 
     async def create_topic(self, name: str) -> int:
         self.calls.append(name)
         self._next += 1
         return self._next
+
+    async def edit_topic(self, topic_id: int, name: str) -> None:
+        self.edits.append((topic_id, name))
 
 
 @pytest.fixture
