@@ -2,6 +2,19 @@
 
 ## Current state / next action
 
+**JN-47 in progress** (2026-07-25): 🟡 harden the **xenon complexity gate** from
+report-mode (`continue-on-error`) to a **hard CI gate**. The gate
+(`xenon --max-absolute C --max-modules B --max-average A src`) currently fails
+because `githost/github.py` ranks **C** (its `parse_github` has CC 14). Plan:
+refactor `parse_github` into small helpers (target rank A) + extract the shared
+commit-id dedup into `githost/parser.py:collect_commit_ids` (reused by the GitLab
+parser), add `auto-tests/group-a/complexity-gate.sh`, then drop `continue-on-error`.
+
+| Test | Group | Status |
+|------|-------|--------|
+| `auto-tests/group-a/complexity-gate.sh` (xenon hard gate green) | (a) | 🟡 |
+| existing githost parser suite stays green (behavior unchanged) | (a) | 🟡 |
+
 **JN-46 done** (2026-07-25): container image + Helm chart + GHCR publishing. Multi-stage
 `Dockerfile` (non-root, serves `jira-nano-http` on :8080), `docker-compose.yml`, Helm
 `chart/` (StatefulSet + PVC git store, `jira-nano init` initContainer, voice-model PVC).
@@ -77,8 +90,8 @@ implemented, TDD, and merged. Nothing deferred.
 - `JN-D5` — HTTP API = drop-in **Jira REST** (v2 + v3) → `docs/http-api.md`
 - `JN-D6` — MCP tool surface (copies Jira MCP servers) → `docs/mcp-tools.md`
 
-**Next action:** none — feature-complete. Optional: PyPI publish (a separate
-explicit step — `uv publish`, installs via `pipx`).
+**Next action:** finish **JN-47** (xenon → hard gate). Then optional: PyPI publish
+(a separate explicit step — `uv publish`, installs via `pipx`).
 
 ## Legend
 

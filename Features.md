@@ -108,3 +108,7 @@ _None._
 48. **`docker-compose.yml`** — local stack (init + HTTP API + optional bot/mcp-http profiles).
 49. **CI security & quality suite** — checkov, hadolint, trivy, semgrep, radon/xenon added
     to the GitHub Actions pipeline; image + chart pushed to GHCR on main/tags.
+50. **Xenon complexity hard gate (JN-47)** — the radon/xenon quality gate graduates from
+    report mode to a **hard** CI gate (`--max-absolute C --max-modules B --max-average A`);
+    `githost/github.py` refactored below C to clear the baseline, shared commit-id dedup
+    hoisted into `githost/parser.py`.

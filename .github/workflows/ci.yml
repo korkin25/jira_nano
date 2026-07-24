@@ -2,7 +2,7 @@
 #
 # Quality/security gates + artifact publishing to GHCR:
 #   lint-test  — ruff, mypy, pytest (3.11 & 3.12)
-#   quality    — radon/xenon code-quality assessment (complexity + maintainability)
+#   quality    — radon/xenon code-quality assessment (complexity + maintainability); HARD gate
 #   security   — bandit, pip-audit, semgrep (SAST)
 #   iac-scan   — checkov, hadolint, trivy (config/fs misconfig)
 #   image      — build the Docker image, trivy-scan it, push to GHCR (main + tags)
@@ -11,7 +11,7 @@
 #
 # Newly-added scanners run in report mode (soft-fail / continue-on-error) so they
 # surface findings without blocking; tighten them to hard gates once the baseline
-# is clean.
+# is clean. Graduated so far: quality (radon/xenon) — JN-47.
 name: CI
 
 on:
@@ -61,13 +61,10 @@ jobs:
           python-version: "3.12"
       - name: Install radon/xenon
         run: pip install radon xenon
-      - name: Cyclomatic complexity + maintainability index (report)
-        run: |
-          radon cc -s -a src
-          radon mi -s src
-      - name: Complexity gate (xenon)
-        continue-on-error: true
-        run: xenon --max-absolute C --max-modules B --max-average A src
+      - name: Complexity report + gate (hard)
+        # radon report + xenon hard gate — thresholds live in the script (single
+        # source of truth, runnable locally). Graduated from report mode in JN-47.
+        run: bash auto-tests/group-a/complexity-gate.sh
 
   security:
     name: Security (bandit/pip-audit/semgrep)

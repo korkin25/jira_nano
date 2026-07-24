@@ -40,6 +40,14 @@ appended below as work is picked up.
 
 Group-(b) methodology: `auto-tests/group-b/kind-deploy.md`.
 
+## Feature 50 — Xenon complexity hard gate (JN-47)
+
+| Test | Group | What it asserts | Status |
+|------|-------|-----------------|--------|
+| `auto-tests/group-a/complexity-gate.sh` | (a) | `xenon --max-absolute C --max-modules B --max-average A src` exits 0 (no module ranks C+) | ⬜ |
+| CI `quality` job (hard) | (a) | the gate is no longer `continue-on-error`; a regression fails the build | ⬜ |
+| `pytest tests/test_githost_github.py tests/test_githost_gitlab.py` | (a) | parser behavior unchanged after the refactor | ⬜ |
+
 <!-- Template — copy per new feature:
 
 ## Feature <n> — <title>

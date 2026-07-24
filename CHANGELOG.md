@@ -26,6 +26,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **JN-47 — xenon complexity gate graduated to a hard CI gate.** The radon/xenon
+  `quality` job is no longer `continue-on-error`: `xenon --max-absolute C
+  --max-modules B --max-average A src` now blocks the build. To clear the baseline,
+  `githost/github.py` was refactored (`parse_github` split into `_parse_pull_request`
+  / `_parse_push`, dropping its complexity from C(14) to A(4)) and the shared
+  push-commit id dedup was hoisted into `githost/parser.py:collect_commit_ids`
+  (reused by the GitLab parser, which drops to B). Thresholds now live in
+  `auto-tests/group-a/complexity-gate.sh` (single source of truth, runnable locally).
 - **JN-45 — governance docs mirrored with `tg_notes`.** `CLAUDE.md` gains explicit,
   apply-without-being-asked sections: **Documentation sync** (trigger→update table),
   **Testing policy** (three test groups a/b/c, TDD-first, CI log analysis even on green,
