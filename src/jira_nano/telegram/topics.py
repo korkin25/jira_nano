@@ -25,6 +25,10 @@ class TopicGateway(Protocol):
         """Rename an existing forum topic (reflects status/blocked, JN-17)."""
         ...
 
+    async def post_message(self, topic_id: int, text: str) -> None:
+        """Post a message into a forum topic (pings, update posts; JN-16/JN-18)."""
+        ...
+
 
 class BotTopicGateway:
     """A :class:`TopicGateway` backed by an aiogram Bot + forum supergroup."""
@@ -41,6 +45,9 @@ class BotTopicGateway:
         await self.bot.edit_forum_topic(
             chat_id=self.chat_id, message_thread_id=topic_id, name=name
         )
+
+    async def post_message(self, topic_id: int, text: str) -> None:
+        await self.bot.send_message(chat_id=self.chat_id, message_thread_id=topic_id, text=text)
 
 
 def topic_name(ticket: Ticket) -> str:

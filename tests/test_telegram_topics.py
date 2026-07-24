@@ -7,24 +7,10 @@ from pathlib import Path
 import pygit2
 import pytest
 
+from conftest import FakeGateway
 from jira_nano.models import LinkType
 from jira_nano.service import TicketService
 from jira_nano.telegram.topics import ensure_topic, topic_id_of, topic_name
-
-
-class FakeGateway:
-    def __init__(self) -> None:
-        self.calls: list[str] = []
-        self.edits: list[tuple[int, str]] = []
-        self._next = 100
-
-    async def create_topic(self, name: str) -> int:
-        self.calls.append(name)
-        self._next += 1
-        return self._next
-
-    async def edit_topic(self, topic_id: int, name: str) -> None:
-        self.edits.append((topic_id, name))
 
 
 @pytest.fixture
@@ -38,9 +24,8 @@ def test_topic_name(service: TicketService) -> None:
     assert topic_name(t) == "JN-1: Fix login"
 
 
-def test_ensure_creates_and_persists(service: TicketService) -> None:
+def test_ensure_creates_and_persists(service: TicketService, gateway: FakeGateway) -> None:
     t = service.create(title="Fix", reporter="e")
-    gateway = FakeGateway()
     topic_id = asyncio.run(ensure_topic(service, gateway, t.id))
     assert topic_id == 101
     assert gateway.calls == ["JN-1: Fix"]
@@ -49,9 +34,8 @@ def test_ensure_creates_and_persists(service: TicketService) -> None:
     assert any(link.type is LinkType.telegram for link in links)
 
 
-def test_ensure_reuses_existing(service: TicketService) -> None:
+def test_ensure_reuses_existing(service: TicketService, gateway: FakeGateway) -> None:
     t = service.create(title="x", reporter="e")
-    gateway = FakeGateway()
     first = asyncio.run(ensure_topic(service, gateway, t.id))
     second = asyncio.run(ensure_topic(service, gateway, t.id))
     assert first == second

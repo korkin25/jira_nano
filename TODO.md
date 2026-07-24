@@ -21,8 +21,8 @@ CI runs the real suite.
 service layer. `JN-34` (remote MCP streamable-HTTP transport) is a deferred
 runtime add-on.
 
-**Phase 3 in progress:** `JN-14` (bot skeleton), `JN-15` (forum topics), `JN-35`
-(change-feed), `JN-17` (status icons) done. **Next: `JN-16`.**
+**Phase 3 in progress:** `JN-14` (skeleton), `JN-15` (topics), `JN-35`
+(change-feed), `JN-17` (icons), `JN-16` (assignment pings) done. **Next: `JN-18`.**
 
 **All planning decisions are resolved:**
 
@@ -33,7 +33,7 @@ runtime add-on.
 - `JN-D5` — HTTP API = drop-in **Jira REST** (v2 + v3) → `docs/http-api.md`
 - `JN-D6` — MCP tool surface (copies Jira MCP servers) → `docs/mcp-tools.md`
 
-**Next action:** implement **`JN-16`** (assignment pings), TDD.
+**Next action:** implement **`JN-18`** (update posts), TDD.
 
 ## Legend
 
@@ -71,7 +71,7 @@ runtime add-on.
 
 ## Phase 3 — Telegram bot mirror
 
-> **Order:** `JN-16` → `JN-18` → `JN-19`. (`JN-14`, `JN-15`, `JN-35`, `JN-17` ✅ done.)
+> **Order:** `JN-18` → `JN-19`. (`JN-14`, `JN-15`, `JN-35`, `JN-17`, `JN-16` ✅ done.)
 > The bot is an internal component — it calls the service layer **in-process**
 > (`JN-D4`) and reacts to committed ticket changes via the git change-feed
 > (`JN-35`), so it mirrors changes from every source (MCP/HTTP/CLI/git pull). The
@@ -79,7 +79,6 @@ runtime add-on.
 
 | ID | Status | Task | Details |
 |----|--------|------|---------|
-| JN-16 | ⬜ | Assignment pings | `@mention` the assignee (Telegram handle via `users.yaml`) in the ticket topic on assign. |
 | JN-18 | ⬜ | Update posts | Post change deltas (transition/edit/new link) from the feed into the ticket topic. |
 | JN-19 | ⬜ | Comment pull-back | Human topic message → `comment` via the service (commit-first→cache), `source=telegram`, author via `users.yaml`. |
 

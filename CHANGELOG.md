@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `JN-16`: assignment pings (`jira_nano.telegram.pings`) — `ping_assignee` posts a
+  `@mention` (Telegram handle from the user directory, `@handle` fallback) into the
+  ticket's topic on assignment.
 - `JN-17`: topic status icons — `topic_title` (status icon + 🚫 blocked overlay)
   and `topic_color` from the workflow (`JN-D1`); `refresh_topic` renames the forum
   topic to reflect the current state.
