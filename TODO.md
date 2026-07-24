@@ -19,7 +19,9 @@ CI runs the real suite.
 
 **Phase 2 core is COMPLETE** — MCP server + HTTP Jira REST API over the shared
 service layer. `JN-34` (remote MCP streamable-HTTP transport) is a deferred
-runtime add-on. **Next: Phase 3 (`JN-14`, Telegram bot).**
+runtime add-on.
+
+**Phase 3 started:** `JN-14` (Telegram bot skeleton, aiogram) done. **Next: `JN-15`.**
 
 **All planning decisions are resolved:**
 
@@ -30,7 +32,7 @@ runtime add-on. **Next: Phase 3 (`JN-14`, Telegram bot).**
 - `JN-D5` — HTTP API = drop-in **Jira REST** (v2 + v3) → `docs/http-api.md`
 - `JN-D6` — MCP tool surface (copies Jira MCP servers) → `docs/mcp-tools.md`
 
-**Next action:** start **Phase 3** — implement **`JN-14`** (Telegram bot skeleton), TDD.
+**Next action:** implement **`JN-15`** (forum topic management), TDD.
 
 ## Legend
 
@@ -68,7 +70,7 @@ runtime add-on. **Next: Phase 3 (`JN-14`, Telegram bot).**
 
 ## Phase 3 — Telegram bot mirror
 
-> **Order:** `JN-14` → `JN-15` → `JN-35` → `JN-17` → `JN-16` → `JN-18` → `JN-19`.
+> **Order:** `JN-15` → `JN-35` → `JN-17` → `JN-16` → `JN-18` → `JN-19`. (`JN-14` ✅ done.)
 > The bot is an internal component — it calls the service layer **in-process**
 > (`JN-D4`) and reacts to committed ticket changes via the git change-feed
 > (`JN-35`), so it mirrors changes from every source (MCP/HTTP/CLI/git pull). The
@@ -76,7 +78,6 @@ runtime add-on. **Next: Phase 3 (`JN-14`, Telegram bot).**
 
 | ID | Status | Task | Details |
 |----|--------|------|---------|
-| JN-14 | ⬜ | Bot skeleton | aiogram Bot API app (webhooks; token from env; forum supergroup from config); in-process service access (`JN-D4`). |
 | JN-15 | ⬜ | Forum topic management | One topic per ticket (and epic); persist the ticket↔topic mapping as a `links[]` entry; reuse existing. |
 | JN-35 | ⬜ | Git change-feed | Derive semantic per-ticket events (status/assignee/blocked/comment/link diffs) from committed changes (on `JN-29`); consumed by the mirror. |
 | JN-17 | ⬜ | Status icons/colors | Map status→topic color + title emoji (`JN-D1`); 🚫 on `blocked`; `editForumTopic` on change. |
