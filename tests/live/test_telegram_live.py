@@ -21,6 +21,7 @@ from aiogram import Bot
 from jira_nano.changefeed import Event
 from jira_nano.service import TicketService
 from jira_nano.telegram.config import TelegramConfig
+from jira_nano.telegram.mirror import mirror_since
 from jira_nano.telegram.pings import ping_assignee
 from jira_nano.telegram.topics import BotTopicGateway, refresh_topic, topic_id_of
 from jira_nano.telegram.updates import post_events
@@ -87,6 +88,41 @@ def test_telegram_mirror_live(tmp_path: Path) -> None:
             # 4. clean up unless asked to keep it for inspection
             if os.environ.get("JIRA_NANO_LIVE_KEEP") != "1":
                 await bot.delete_forum_topic(chat_id=chat_id, message_thread_id=topic_id)
+        finally:
+            await bot.session.close()
+
+    asyncio.run(run())
+
+
+def test_auto_trigger_and_banners_live(tmp_path: Path) -> None:
+    """The change-feed mirror auto-posts (banner cards + pings) for new commits."""
+    svc = _repo(tmp_path)
+    directory = UserDirectory.load(svc.paths.config_dir)
+    cfg = TelegramConfig.from_env()
+    assert cfg.chat_id is not None, "TELEGRAM_CHAT_ID must be set"
+    chat_id = cfg.chat_id
+    bot = Bot(token=cfg.token)
+    gw = BotTopicGateway(bot, chat_id)
+
+    async def run() -> None:
+        try:
+            seed = svc.create(title="[live-test] seed", reporter="me")  # first commit
+            baseline = await mirror_since(svc, gw, directory)           # baseline, no replay
+            assert baseline is not None
+
+            ticket = svc.create(title="[live-test] auto", reporter="me")
+            svc.assign(ticket.id, "me")
+            svc.transition(ticket.id, "in-progress")
+            svc.comment(ticket.id, author="me", body="auto-trigger + banner live")
+
+            head = await mirror_since(svc, gw, directory)               # auto-posts cards/pings
+            assert head is not None and head != baseline
+
+            if os.environ.get("JIRA_NANO_LIVE_KEEP") != "1":
+                for tid in (seed.id, ticket.id):
+                    topic = topic_id_of(svc.get(tid).links)
+                    if topic is not None:
+                        await bot.delete_forum_topic(chat_id=chat_id, message_thread_id=topic)
         finally:
             await bot.session.close()
 
