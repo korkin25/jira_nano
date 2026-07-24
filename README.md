@@ -12,11 +12,16 @@ communication happens through a Telegram bot mirror instead of email.
 ## Install
 
 ```bash
+# once published to PyPI:
 pipx install "jira-nano[mcp,http,telegram]"   # surfaces are optional extras
+
+# available today, straight from GitHub (no PyPI account needed):
+pipx install "jira-nano[mcp,http,telegram] @ git+https://github.com/korkin25/jira_nano.git"
 ```
 
 Then run the CLI (`jira-nano --help`) or the MCP server over stdio
-(`jira-nano-mcp`). See [`docs/packaging.md`](docs/packaging.md) for details.
+(`jira-nano-mcp`). Publishing to PyPI (registration + Trusted Publishing) is
+covered in [`docs/packaging.md`](docs/packaging.md).
 
 ## Why
 

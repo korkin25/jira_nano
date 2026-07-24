@@ -22,6 +22,15 @@ pipx install "jira-nano[mcp,http,telegram]"  # everything
 
 `uv tool install "jira-nano[...]"` works identically if you prefer uv.
 
+> **Not on PyPI yet?** Until `jira-nano` is published, install straight from
+> GitHub — this works today with no PyPI account:
+>
+> ```bash
+> pipx install "git+https://github.com/korkin25/jira_nano.git"
+> # with extras:
+> pipx install "jira-nano[mcp,http,telegram] @ git+https://github.com/korkin25/jira_nano.git"
+> ```
+
 ## Console scripts
 
 | Command | Purpose |
@@ -52,11 +61,25 @@ Python has no static binary by default. For a self-contained artifact, a
 single-file build via **PyInstaller** or **shiv** can be produced from the wheel
 in a later step; for now `uv tool install` / `pipx` give reproducible installs.
 
-## Publishing (separate, explicit step)
+## Publishing to PyPI (separate, explicit step)
 
-Publishing to PyPI is intentionally a later, manual step (never automatic):
+`pipx install jira-nano` pulls from **PyPI**, so the package has to be published
+there first. Publishing is intentionally a manual, explicit step (never on every
+tag). **One-time setup — done by the maintainer:**
+
+1. **Register** at <https://pypi.org> — verify your email and enable 2FA. Check
+   that the name `jira-nano` is available (pick another if it is taken).
+2. **Configure Trusted Publishing** (recommended — no API token stored in the
+   repo). On PyPI → *Your projects* → *Publishing* → add a **pending GitHub
+   publisher**:
+   - Owner: `korkin25` · Repository: `jira_nano`
+   - Workflow: `publish.yml` · Environment: `pypi`
+3. **Publish**: GitHub → *Actions* → **Publish to PyPI** → *Run workflow* (on the
+   tag you want to release). The workflow builds and uploads via OIDC.
+
+Prefer the command line with an API token instead of Trusted Publishing:
 
 ```bash
 uv build
-uv publish        # requires PyPI credentials; run only for a tagged release
+uv publish        # or: twine upload dist/*   (needs a PyPI token)
 ```

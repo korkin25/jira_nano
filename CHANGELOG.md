@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Distribution: install-from-GitHub instructions (works before PyPI) and a manual
+  `Publish to PyPI` GitHub workflow using Trusted Publishing (OIDC, no stored
+  token); `docs/packaging.md` documents PyPI registration + setup.
 - `JN-34`: remote MCP transport — `http_app` exposes the MCP server as a
   streamable-HTTP ASGI app, and a `jira-nano-mcp-http` console script serves it.
 
