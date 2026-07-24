@@ -13,8 +13,8 @@ place (`CLAUDE.md`, `README.md`, `docs/`, `CHANGELOG.md`, `LICENSE`,
 queries, background sync). 66 tests green; ruff + mypy clean. Released **v0.1.0**;
 CI runs the real suite.
 
-**Phase 2 in progress:** `JN-9` (service API), `JN-10` (workflow engine:
-transitions/guards/blocked) done. **Next: `JN-33`.**
+**Phase 2 in progress:** `JN-9` (service API), `JN-10` (workflow engine), `JN-33`
+(Jira issue mapper v2/v3) done. **Next: `JN-30`.**
 
 **All planning decisions are resolved:**
 
@@ -25,7 +25,7 @@ transitions/guards/blocked) done. **Next: `JN-33`.**
 - `JN-D5` — HTTP API = drop-in **Jira REST** (v2 + v3) → `docs/http-api.md`
 - `JN-D6` — MCP tool surface (copies Jira MCP servers) → `docs/mcp-tools.md`
 
-**Next action:** implement **`JN-33`** (Jira issue field mapper), TDD.
+**Next action:** implement **`JN-30`** (JQL subset parser), TDD.
 
 ## Legend
 
@@ -49,8 +49,8 @@ transitions/guards/blocked) done. **Next: `JN-33`.**
 
 ## Phase 2 — MCP + API
 
-> **Order:** `JN-33` → `JN-30` → `JN-11` → `JN-12` → `JN-31` → `JN-32` → `JN-13`.
-> (`JN-9`, `JN-10` ✅ done.) **MCP ships before HTTP** (`JN-D4`). Adapters are thin: a
+> **Order:** `JN-30` → `JN-11` → `JN-12` → `JN-31` → `JN-32` → `JN-13`.
+> (`JN-9`, `JN-10`, `JN-33` ✅ done.) **MCP ships before HTTP** (`JN-D4`). Adapters are thin: a
 > shared presentation layer — Jira field mapper (`JN-33`) + JQL parser (`JN-30`) —
 > sits between the one service layer and both the MCP and HTTP adapters. Internal
 > components (bot, git-host handlers) call the service layer **in-process**, not
@@ -59,7 +59,6 @@ transitions/guards/blocked) done. **Next: `JN-33`.**
 
 | ID | Status | Task | Details |
 |----|--------|------|---------|
-| JN-33 | ⬜ | Jira issue field mapper | Ticket ↔ Jira issue JSON per `docs/http-api.md` (summary/statusCategory/issuetype/**Flagged**/parent/labels/comments/links; user `name` v2 / `accountId` v3). Shared by MCP + HTTP. |
 | JN-30 | ⬜ | JQL subset parser | Parse the `docs/http-api.md` JQL subset → cache query (`JN-8`). Shared by MCP + HTTP search. |
 | JN-11 | ⬜ | MCP server (stdio) | FastMCP over stdio exposing the `docs/mcp-tools.md` v1 tools; thin adapters over the service; search via `JN-30`, returns via `JN-33`. |
 | JN-12 | ⬜ | Jira-close tool shape | Names/args/returns match `mcp-atlassian` (`docs/mcp-tools.md`); delete→archive; `jira_` prefix; golden conformance. **MCP ships here.** |
