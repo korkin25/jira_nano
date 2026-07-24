@@ -1,0 +1,20 @@
+jira-nano {{ .Chart.AppVersion }} deployed as {{ include "jira-nano.fullname" . }}.
+
+Image:   {{ include "jira-nano.image" . }}
+Command: {{ .Values.command | join " " }}
+
+The git ticket store (source of record) + SQLite cache live on the "data" PVC
+({{ .Values.persistence.size }}), initialised by the init-store initContainer.
+
+Reach the HTTP Jira REST API from inside the cluster:
+
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "jira-nano.fullname" . }} 8080:{{ .Values.service.port }}
+  curl -s localhost:8080/rest/api/2/myself
+
+{{- if .Values.voiceModel.enabled }}
+
+Voice / STT: the Whisper model is NOT baked into the image. It is cached on the
+"{{ include "jira-nano.voiceClaimName" . }}" PVC (mounted at {{ .Values.voiceModel.mountPath }}) and
+fetched on first use, or preloaded by devops with `jira-nano-voice-setup`.
+See chart/README.md § Voice / STT model.
+{{- end }}

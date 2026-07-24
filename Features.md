@@ -95,3 +95,16 @@ _None._
 36. **Voice-message transcription**: a voice reply in a ticket topic is transcribed
     (pluggable STT — local Whisper by default, optional OpenAI cloud) and pulled back into
     the ticket as a comment; the model is provisioned at startup, cached on disk.
+
+### Deployment & CI (JN-46)
+
+45. **Container image** — multi-stage `Dockerfile` (non-root uid 10000), default command
+    serves the HTTP Jira REST API on :8080; published to `ghcr.io/korkin25/jira-nano`.
+46. **Helm chart** (`chart/`) — StatefulSet + PVC for the git ticket store & SQLite cache,
+    initContainer runs `jira-nano init`, TCP probes, optional Service/Ingress/ServiceMonitor/
+    HPA/PDB; published as an OCI chart to `ghcr.io/korkin25/charts/jira-nano`.
+47. **Voice-model PVC** — Whisper model kept off the image, on a chart PVC (fetched on first
+    use or preloaded by devops); documented in `chart/README.md`. Identical pattern in tg_notes.
+48. **`docker-compose.yml`** — local stack (init + HTTP API + optional bot/mcp-http profiles).
+49. **CI security & quality suite** — checkov, hadolint, trivy, semgrep, radon/xenon added
+    to the GitHub Actions pipeline; image + chart pushed to GHCR on main/tags.

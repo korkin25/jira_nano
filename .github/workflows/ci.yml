@@ -1,6 +1,17 @@
-# CI for jira_nano: lint, type-check, test (3.11 & 3.12), and a security scan on
-# every push/PR. A version tag additionally builds the distribution (publishing
-# to PyPI is a separate, later, explicit step).
+# CI for jira_nano.
+#
+# Quality/security gates + artifact publishing to GHCR:
+#   lint-test  — ruff, mypy, pytest (3.11 & 3.12)
+#   quality    — radon/xenon code-quality assessment (complexity + maintainability)
+#   security   — bandit, pip-audit, semgrep (SAST)
+#   iac-scan   — checkov, hadolint, trivy (config/fs misconfig)
+#   image      — build the Docker image, trivy-scan it, push to GHCR (main + tags)
+#   chart      — helm lint/template, package + push the OCI chart to GHCR (tags)
+#   build      — Python sdist/wheel on a version tag
+#
+# Newly-added scanners run in report mode (soft-fail / continue-on-error) so they
+# surface findings without blocking; tighten them to hard gates once the baseline
+# is clean.
 name: CI
 
 on:
@@ -8,6 +19,14 @@ on:
     branches: ["**"]
     tags: ["v*"]
   pull_request:
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE: ghcr.io/${{ github.repository_owner }}/jira-nano
+  CHART_REPO: oci://ghcr.io/${{ github.repository_owner }}/charts
 
 jobs:
   lint-test:
@@ -17,8 +36,8 @@ jobs:
       matrix:
         python-version: ["3.11", "3.12"]
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install
@@ -32,23 +51,160 @@ jobs:
       - name: Pytest
         run: pytest -q
 
-  security:
-    name: Security scan
+  quality:
+    name: Code quality (radon/xenon)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Install (runtime deps + scanners)
+      - name: Install radon/xenon
+        run: pip install radon xenon
+      - name: Cyclomatic complexity + maintainability index (report)
+        run: |
+          radon cc -s -a src
+          radon mi -s src
+      - name: Complexity gate (xenon)
+        continue-on-error: true
+        run: xenon --max-absolute C --max-modules B --max-average A src
+
+  security:
+    name: Security (bandit/pip-audit/semgrep)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install (project + bandit only, keep pip-audit env clean)
         run: |
           python -m pip install --upgrade pip
           pip install -e .
           pip install bandit pip-audit
       - name: Bandit
         run: bandit -c pyproject.toml -r src
-      - name: pip-audit
+      - name: pip-audit (project env)
         run: pip-audit
+      - name: Semgrep (SAST, isolated via pipx)
+        continue-on-error: true
+        run: pipx run semgrep scan --config p/python --config p/security-audit --error --skip-unknown-extensions
+
+  checkov:
+    name: Checkov (IaC misconfig)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Checkov (Dockerfile / GitHub Actions / secrets)
+        continue-on-error: true
+        run: |
+          pip install checkov
+          checkov -d . --framework dockerfile,github_actions,secrets --soft-fail --quiet
+
+  hadolint:
+    name: Hadolint (Dockerfile)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Hadolint
+        run: docker run --rm -i hadolint/hadolint:latest hadolint - < Dockerfile || true
+
+  trivy-config:
+    name: Trivy (config misconfig)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Trivy (Dockerfile/compose/helm/k8s)
+        continue-on-error: true
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b "$RUNNER_TEMP/bin"
+          "$RUNNER_TEMP/bin/trivy" config . --exit-code 0
+
+  image:
+    name: Docker image → GHCR
+    runs-on: ubuntu-latest
+    needs: [lint-test]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Image metadata (tags)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha
+            type=semver,pattern={{version}}
+            type=raw,value=latest,enable={{is_default_branch}}
+      - name: Build (load locally)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          provenance: false
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+      - name: Trivy (image vulnerabilities, report)
+        continue-on-error: true
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b "$RUNNER_TEMP/bin"
+          "$RUNNER_TEMP/bin/trivy" image --exit-code 0 --ignore-unfixed "${IMAGE}:${{ steps.meta.outputs.version }}"
+      # Push only on main and version tags.
+      - name: Push to GHCR
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          while read -r t; do [ -n "$t" ] && docker push "$t"; done <<< "${{ steps.meta.outputs.tags }}"
+
+  chart:
+    name: Helm chart → GHCR
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-helm@v4
+      - name: Lint & template
+        run: |
+          helm lint chart
+          helm template t chart > /dev/null
+      - name: Package
+        run: helm package chart --destination /tmp/chart
+      - name: Push OCI chart (tags only)
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io -u ${{ github.actor }} --password-stdin
+          helm push /tmp/chart/*.tgz ${{ env.CHART_REPO }}
+
+  functional:
+    name: Functional (HTTP API e2e)
+    runs-on: ubuntu-latest
+    # A minimal env comes from the GitHub Actions environment (variables/secrets).
+    environment: ci-functional
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: DOCKER_BUILDKIT=1 docker build -t jira-nano:ci .
+      - name: Boot the API and exercise it with a token
+        env:
+          JIRA_NANO_TOKENS: ${{ vars.JIRA_NANO_TOKENS || 'ci:ci-functional-token' }}
+        run: |
+          docker run -d --name jn -p 8080:8080 -e JIRA_NANO_TOKENS="$JIRA_NANO_TOKENS" \
+            --entrypoint sh jira-nano:ci -c 'jira-nano --repo /data/repo init && exec jira-nano-http'
+          for i in $(seq 1 20); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' localhost:8080/rest/api/2/myself || true)
+            [ "$code" != "000" ] && break; sleep 1
+          done
+          tok="${JIRA_NANO_TOKENS##*:}"
+          code=$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $tok" localhost:8080/rest/api/2/myself)
+          echo "authenticated GET /rest/api/2/myself -> $code"
+          docker logs jn | tail -15
+          docker rm -f jn >/dev/null 2>&1 || true
+          test "$code" = "200"
 
   build:
     name: Build distribution (on tag)
@@ -56,8 +212,8 @@ jobs:
     needs: [lint-test, security]
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - name: Build
@@ -65,7 +221,7 @@ jobs:
           python -m pip install --upgrade pip build
           python -m build
       - name: Upload dist
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: dist
           path: dist/*

@@ -25,6 +25,21 @@ The shipped suite (`pytest`, ruff + mypy clean) plus the gated live tests
 (`JIRA_NANO_LIVE=1`) already cover the delivered features. New feature sections are
 appended below as work is picked up.
 
+## Feature 45–49 — Container image + Helm chart + GHCR CI (JN-46)
+
+| Test | Group | What it asserts | Status |
+|------|-------|-----------------|--------|
+| `helm lint chart` | (a) | chart lints clean | ✅ |
+| `helm template` (default + toggles) | (a) | renders for all value permutations | ✅ |
+| `docker build .` | (a) | image builds; app importable; entrypoint present | ✅ |
+| `auto-tests/group-a/validate-deploy.sh` | (a) | CI-runnable: helm lint+template + docker build | ✅ |
+| Image runs `jira-nano-http`, serves :8080 | (b) | container boots, TCP :8080 accepts | ⬜ |
+| `helm install` on a kind cluster; init + probes | (b) | StatefulSet ready, PVC bound, init idempotent | ⬜ |
+| Voice model fetched to the PVC on first STT | (b) | model lands on `/models`, survives restart | ⬜ |
+| GHCR image + OCI chart pull post-release | (c) | manual: `docker pull` / `helm pull` after a tag | ⬜ |
+
+Group-(b) methodology: `auto-tests/group-b/kind-deploy.md`.
+
 <!-- Template — copy per new feature:
 
 ## Feature <n> — <title>

@@ -2,6 +2,12 @@
 
 ## Current state / next action
 
+**JN-46 done** (2026-07-25): container image + Helm chart + GHCR publishing. Multi-stage
+`Dockerfile` (non-root, serves `jira-nano-http` on :8080), `docker-compose.yml`, Helm
+`chart/` (StatefulSet + PVC git store, `jira-nano init` initContainer, voice-model PVC).
+CI gains checkov/hadolint/trivy/semgrep/radon-xenon + pushes image & OCI chart to GHCR.
+`helm lint`/`template` pass locally; Docker build validated. In `CHANGELOG.md` (`[Unreleased]`).
+
 **JN-45 done** (2026-07-25): governance docs mirrored with `tg_notes` — `CLAUDE.md` now
 carries the Documentation-sync table, the Testing policy (groups a/b/c, TDD-first, release
 gate) and the extended MANDATORY Per-task lifecycle; features moved to root `Features.md`;
