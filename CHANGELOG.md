@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `JN-25`: `SKILL.md` — an Agent Skill (agentskills.io format) describing how to
+  drive jira_nano via its MCP tools / CLI, with when-to-use triggers; validated by
+  tests.
 - `JN-37`: polling fallback (`jira_nano.githost.polling.poll_once`) — for hosts
   without webhooks, fetches + parses + dispatches events through the same
   pipeline, deduped by a `seen` set. **Phase 4 (Git-host) complete.**
