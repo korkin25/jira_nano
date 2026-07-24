@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `JN-21`: GitLab integration (`jira_nano.githost.gitlab.parse_gitlab`) —
+  normalizes merge-request (open/merge/close) and push payloads into
+  `GitHostEvent`; drives linking + transitions end-to-end via the receiver.
 - `JN-36`: webhook receiver + normalized event model (`jira_nano.githost.webhook`)
   — a FastAPI listener (separate from the Jira REST API) that verifies GitLab
   (token) / GitHub (HMAC-SHA256) signatures, normalizes payloads into
