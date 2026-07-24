@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `JN-14`: Telegram bot skeleton (`jira_nano.telegram`, aiogram) — env-based
+  config (bot token + forum chat id), `build_bot`, and `build_dispatcher` with
+  in-process service access. `aiogram` is an optional extra (`jira-nano[telegram]`).
+
 ## [0.2.0] - 2026-07-24
 
 ### Added

@@ -28,3 +28,7 @@ class JqlError(JiraNanoError):
 
 class AuthError(JiraNanoError):
     """Authentication failed for an HTTP request (JN-32)."""
+
+
+class ConfigError(JiraNanoError):
+    """Required configuration is missing or invalid (e.g. a bot token, JN-14)."""
