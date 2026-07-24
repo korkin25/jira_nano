@@ -7,11 +7,11 @@ place (`CLAUDE.md`, `README.md`, `docs/`, `CHANGELOG.md`, `LICENSE`,
 `.gitignore`, `AGENTS.md`, CI stub). The **Phase 1 package skeleton** is in place
 (`pyproject.toml`, `src/jira_nano/`, `tests/`).
 
-**Implementation is underway** (TDD; a feature branch per task, merged to `main`
-when the suite is green). Done: `JN-1` (models + serialization), `JN-28` (config
-+ user directory), `JN-4` (cache schema), `JN-2` (git store), `JN-3` (id
-allocator), `JN-5` (cache rebuild), `JN-6` (incremental upsert), `JN-29`
-(background cache sync), `JN-7` (CRUD service). **Next: `JN-8` (last Phase 1).**
+**Phase 1 (Core) is COMPLETE** — all ten tasks implemented TDD and merged to
+`main`: `JN-1`, `JN-28`, `JN-4`, `JN-2`, `JN-3`, `JN-5`, `JN-6`, `JN-29`, `JN-7`,
+`JN-8` (models, git store, SQLite cache, config/users, CRUD service, cache-backed
+queries, background sync). 66 tests green; ruff + mypy clean. **Next: Phase 2,
+`JN-9`.**
 
 **All planning decisions are resolved:**
 
@@ -22,7 +22,7 @@ allocator), `JN-5` (cache rebuild), `JN-6` (incremental upsert), `JN-29`
 - `JN-D5` — HTTP API = drop-in **Jira REST** (v2 + v3) → `docs/http-api.md`
 - `JN-D6` — MCP tool surface (copies Jira MCP servers) → `docs/mcp-tools.md`
 
-**Next action:** implement **`JN-8`** (search + list + board) — completes Phase 1.
+**Next action:** start **Phase 2** — implement **`JN-9`** (shared service API), TDD.
 
 ## Legend
 
@@ -43,22 +43,6 @@ allocator), `JN-5` (cache rebuild), `JN-6` (incremental upsert), `JN-29`
 - Local work items use `JN-<n>`; decisions use `JN-D<n>`.
 - Numbering is **mandatory**, sequential, and **never reused** — a retired id
   stays retired.
-
-## Phase 1 — Core (git ticket store + sqlite cache + CRUD + search)
-
-> **Remaining:** `JN-8`. (`JN-1`, `JN-28`, `JN-4`, `JN-2`, `JN-3`, `JN-5`, `JN-6`,
-> `JN-29`, `JN-7` ✅ done — see `CHANGELOG.md`.)
-> **Conventions:** **Git is the single source of truth**; the local SQLite cache
-> mirrors everything (tickets + users) for speed and serves **all** reads
-> (`get`/`list`/`search`/`board`). **Writes commit to Git first, then update the
-> cache** — never the reverse. Status transitions (`JN-D1`) are validated in
-> Phase 2 (`JN-10`) — Phase 1 `create` sets initial `todo` and `update` edits
-> fields only. The user directory (`.jira_nano/users.yaml`) is git-backed and
-> mirrored into the cache like tickets.
-
-| ID | Status | Task | Details |
-|----|--------|------|---------|
-| JN-8 | ⬜ | Search + list + board | Cache-backed `search` (FTS+filters), filtered `list`, `board` grouped by status. |
 
 ## Phase 2 — MCP + API
 
