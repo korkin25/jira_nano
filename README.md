@@ -1,27 +1,29 @@
 # jira_nano
 
+[![PyPI](https://img.shields.io/pypi/v/jira-nano)](https://pypi.org/project/jira-nano/)
+
 A lightweight, **AI-native issue tracker** where the source of record is a Git
 repository, the query layer is a rebuildable SQLite cache, and human
 communication happens through a Telegram bot mirror instead of email.
 
-> **Status: v0.3.0 — feature-complete.** All five phases are implemented (core
-> git store + SQLite cache + CRUD, MCP server + HTTP Jira REST API, Telegram
-> mirror, GitLab/GitHub integration, and skill/CLI packaging), with 210 tests,
-> ruff + mypy clean, and CI. See [`CHANGELOG.md`](CHANGELOG.md).
+> **Status: v0.3.2 — feature-complete, [on PyPI](https://pypi.org/project/jira-nano/).**
+> All five phases are implemented (core git store + SQLite cache + CRUD, MCP
+> server + HTTP Jira REST API, Telegram mirror, GitLab/GitHub integration, and
+> skill/CLI packaging), with 211 tests, ruff + mypy clean, and CI. See
+> [`CHANGELOG.md`](CHANGELOG.md).
 
 ## Install
 
 ```bash
-# once published to PyPI:
 pipx install "jira-nano[mcp,http,telegram]"   # surfaces are optional extras
-
-# available today, straight from GitHub (no PyPI account needed):
-pipx install "jira-nano[mcp,http,telegram] @ git+https://github.com/korkin25/jira_nano.git"
 ```
 
+Or straight from source (e.g. unreleased changes):
+`pipx install "jira-nano[mcp,http,telegram] @ git+https://github.com/korkin25/jira_nano.git"`.
+
 Then run the CLI (`jira-nano --help`) or the MCP server over stdio
-(`jira-nano-mcp`). Publishing to PyPI (registration + Trusted Publishing) is
-covered in [`docs/packaging.md`](docs/packaging.md).
+(`jira-nano-mcp`). Release & publishing details are in
+[`docs/packaging.md`](docs/packaging.md).
 
 ## Why
 
