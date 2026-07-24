@@ -1,20 +1,30 @@
-"""Shared pytest fixtures.
-
-Filled in test-first during the Phase 1 dev chat (TDD). The core fixture is a
-temporary jira_nano repository (git init + ``tickets/`` + ``.jira_nano/``).
-"""
+"""Shared pytest fixtures."""
 from __future__ import annotations
-
-from pathlib import Path
 
 import pytest
 
 
-@pytest.fixture
-def repo(tmp_path: Path) -> Path:
-    """A temporary jira_nano repository.
+class FakeGateway:
+    """In-memory stand-in for the Telegram topic gateway (records all calls)."""
 
-    TODO(JN-2/JN-28): initialize a pygit2 repo with sample tickets and a default
-    ``.jira_nano/`` (workflow.yaml + users.yaml), and return its root.
-    """
-    return tmp_path
+    def __init__(self) -> None:
+        self.calls: list[str] = []  # created topic names
+        self.edits: list[tuple[int, str]] = []  # (topic_id, new name)
+        self.posts: list[tuple[int, str]] = []  # (topic_id, text)
+        self._next = 100
+
+    async def create_topic(self, name: str) -> int:
+        self.calls.append(name)
+        self._next += 1
+        return self._next
+
+    async def edit_topic(self, topic_id: int, name: str) -> None:
+        self.edits.append((topic_id, name))
+
+    async def post_message(self, topic_id: int, text: str) -> None:
+        self.posts.append((topic_id, text))
+
+
+@pytest.fixture
+def gateway() -> FakeGateway:
+    return FakeGateway()
