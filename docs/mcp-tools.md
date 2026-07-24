@@ -1,8 +1,7 @@
 # MCP tool surface
 
-> **Status: DRAFT / proposal (`JN-D6`).** Specs the MCP tool shape (`JN-11`,
-> `JN-12`) by copying common Jira MCP servers, scoped to a git-backed nano
-> tracker. Open scoping questions at the bottom.
+> **Status: RESOLVED (`JN-D6`).** Specs the MCP tool shape (`JN-11`, `JN-12`) by
+> copying common Jira MCP servers, scoped to a git-backed nano tracker.
 
 ## Reference servers surveyed
 
@@ -20,9 +19,9 @@
    - Git history **is** the changelog and dev-info panel.
    - `.jira_nano/users.yaml` **is** the user directory.
    - The configured workflow (`JN-D1`) **is** transitions.
-3. **Follow the "create/update only, no hard delete" stance** of the official
-   server (proposed — see open questions): closing = `archived`, and git history
-   preserves everything anyway.
+3. **Create/update only, no hard delete** (like the official server): closing =
+   `archived`, and git history preserves everything anyway.
+4. **Keep the `jira_` name prefix verbatim** for maximal drop-in compatibility.
 
 ## Capability matrix
 
@@ -36,7 +35,7 @@ Legend: ✅ copy (keep Jira name) · 🔧 adapt onto our model · 🕒 defer (la
 | `jira_get_issue` | ✅ | Read one ticket. |
 | `jira_update_issue` | ✅ | Edit frontmatter/body fields (incl. `blocked`, `priority`, `labels`, `parent`). |
 | `jira_batch_create_issues` | ✅ | Bulk create — valuable for agents. |
-| `jira_delete_issue` | 🔧 | Proposed: **no hard delete**; map to `archived` (open Q1). |
+| `jira_delete_issue` | 🔧 | **No hard delete**; maps to `archived` (`JN-D6`). |
 | `jira_batch_get_changelogs` | 🔧 | Serve from `git log` of the ticket file. |
 | `jira_get_issue_dates` | 🔧 | From `created`/`updated` frontmatter. |
 | `jira_get_create_fields`, `jira_get_field_options`, `jira_search_fields`, `jira_get_project_fields`, `jira_get_project_issue_types` | 🕒 | Schema is fixed (`JN-D3`); expose a minimal stub later for Jira-client compat. |
@@ -146,13 +145,10 @@ jira_batch_get_changelogs        # served from git log
 flag** (`JN-D1`). Proposed to fold into `jira_update_issue` (set
 `blocked`/`blocked_reason`) rather than add a bespoke tool.
 
-## Open questions (`JN-D6`)
+## Resolved scope (`JN-D6`)
 
-1. **Delete semantics.** Follow the official server (**no hard delete**, map
-   `jira_delete_issue` → `archived`), or keep a real delete tool (git makes it
-   recoverable)?
-2. **Time tracking (worklogs).** Defer to v2, or include from the start?
-3. **Agile & releases (sprints/versions).** Defer to v2, or scope some now?
-4. **Attachments.** Defer, or design a files-in-git story now?
-5. **Naming prefix.** Keep the `jira_` prefix verbatim for maximal drop-in
-   compatibility, or use a `jn_`/`jira_nano_` namespace with aliases?
+- **Delete:** no hard delete; `jira_delete_issue` maps to `archived`.
+- **Worklogs (time tracking):** deferred to v2.
+- **Agile & releases (sprints/versions):** deferred to v2.
+- **Attachments:** deferred to v2 (files-in-git story TBD).
+- **Naming prefix:** keep `jira_` verbatim for maximal drop-in compatibility.

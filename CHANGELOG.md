@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Resolved decision `JN-D6`: MCP tool surface specced in `docs/mcp-tools.md` —
+  copies the `mcp-atlassian` Jira tool shape (names/args) scoped to a git-backed
+  tracker; no hard delete (`jira_delete_issue` → `archived`), `jira_` prefix kept
+  verbatim, worklogs/agile/attachments deferred to v2.
 - Resolved decision `JN-D4`: **MCP ships before the HTTP API**; both are thin
   adapters over the shared service layer, and internal components (Telegram bot,
   git-host handlers) call that layer in-process rather than over HTTP

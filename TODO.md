@@ -16,6 +16,9 @@ repository.
 - `JN-D3` — ticket-file schema → `docs/ticket-schema.md`
 - `JN-D4` — **MCP ships before HTTP**; internal callers in-process → `docs/architecture.md` §4
 
+**Also resolved (Phase 2):** `JN-D6` — MCP tool surface (copies Jira MCP servers)
+→ `docs/mcp-tools.md`.
+
 **Open (non-blocking):** `JN-D5` — full Jira-REST-API compatibility for the HTTP
 API (Phase 2; to discuss before `JN-13`).
 
@@ -46,7 +49,7 @@ API (Phase 2; to discuss before `JN-13`).
 | ID | Decision | Notes |
 |----|----------|-------|
 | JN-D5 | HTTP API Jira compatibility | Make the HTTP API **fully compatible with the Jira REST API** (drop-in for Jira clients). Scope/version TBD — to discuss before `JN-13`. |
-| JN-D6 | MCP tool surface & scope | Draft matrix in `docs/mcp-tools.md` (copies `mcp-atlassian`). Open scope Qs: delete-vs-archive, worklogs, sprints/versions, attachments, naming prefix — resolve before `JN-11`/`JN-12`. |
+| ~~JN-D6~~ | ~~MCP tool surface & scope~~ | **Resolved** — surface in `docs/mcp-tools.md` (copies `mcp-atlassian`; delete→archive, `jira_` prefix, worklogs/agile/attachments deferred to v2). |
 
 ## Phase 1 — Core (git ticket store + sqlite cache + CRUD + search)
 
