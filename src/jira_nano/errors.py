@@ -24,3 +24,7 @@ class TransitionError(JiraNanoError):
 
 class JqlError(JiraNanoError):
     """A JQL query could not be parsed or referenced an unsupported field (JN-30)."""
+
+
+class AuthError(JiraNanoError):
+    """Authentication failed for an HTTP request (JN-32)."""
