@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **JN-46 — container image, Helm chart & GHCR publishing.** Multi-stage
+  `Dockerfile` (non-root uid 10000; default serves the HTTP Jira REST API on
+  :8080), `docker-compose.yml` (init + API + optional bot/mcp-http profiles), and
+  a Helm `chart/` adapted from the BNPL "application" chart — StatefulSet + PVC for
+  the git ticket store & SQLite cache, `jira-nano init` initContainer, TCP probes,
+  optional Service/Ingress/ServiceMonitor/HPA/PDB. The Whisper voice model is kept
+  off the image and provisioned via a chart PVC (fetched on first use or preloaded),
+  documented in `chart/README.md`. CI (GitHub Actions) gains a security & quality
+  suite — checkov, hadolint, trivy, semgrep, radon/xenon — and publishes the image
+  to `ghcr.io/korkin25/jira-nano` (main + tags) and the OCI chart to
+  `ghcr.io/korkin25/charts/jira-nano` (tags), alongside the existing PyPI release.
+
 ### Changed
 
 - **JN-45 — governance docs mirrored with `tg_notes`.** `CLAUDE.md` gains explicit,
