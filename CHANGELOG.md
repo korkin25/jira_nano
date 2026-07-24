@@ -56,6 +56,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `JN-1`: ticket domain models (pydantic, with consistency validation) and
+  byte-stable Markdown (de)serialization (`loads`/`dumps`) for `tickets/JN-<n>.md`.
 - Phase 1 package skeleton: `pyproject.toml` (hatchling, pydantic/pygit2/PyYAML,
   ruff/pytest/mypy config) and `src/jira_nano/` typed stubs — `models`,
   `serialization`, `ids`, `config`, `users`, `store`, `cache/` (schema/rebuild/
