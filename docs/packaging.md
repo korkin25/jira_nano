@@ -6,17 +6,21 @@ extra.
 
 ## Install
 
+**[pipx](https://pipx.pypa.io/) is the recommended installer** — it puts the
+`jira-nano` / `jira-nano-mcp` commands on your PATH in an isolated environment.
+
 ```bash
 # core only (CLI over a local ticket repo)
-uv tool install jira-nano
-# or: pipx install jira-nano
+pipx install jira-nano
 
 # with a surface (extras):
-uv tool install "jira-nano[mcp]"     # MCP server
-uv tool install "jira-nano[http]"    # HTTP Jira REST API
-uv tool install "jira-nano[telegram]"# Telegram bot mirror
-uv tool install "jira-nano[mcp,http,telegram]"  # everything
+pipx install "jira-nano[mcp]"        # MCP server
+pipx install "jira-nano[http]"       # HTTP Jira REST API
+pipx install "jira-nano[telegram]"   # Telegram bot mirror
+pipx install "jira-nano[mcp,http,telegram]"  # everything
 ```
+
+`uv tool install "jira-nano[...]"` works identically if you prefer uv.
 
 ## Console scripts
 

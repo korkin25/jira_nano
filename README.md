@@ -4,11 +4,19 @@ A lightweight, **AI-native issue tracker** where the source of record is a Git
 repository, the query layer is a rebuildable SQLite cache, and human
 communication happens through a Telegram bot mirror instead of email.
 
-> **Status: planning.** A Phase 1 package **skeleton** is scaffolded
-> (`pyproject.toml`, `src/jira_nano/` typed stubs that all raise
-> `NotImplementedError`, and a `tests/` layout) — no logic is implemented yet.
-> Development happens in a separate session. See [`TODO.md`](TODO.md) for the
-> current state and next action.
+> **Status: v0.3.0 — feature-complete.** All five phases are implemented (core
+> git store + SQLite cache + CRUD, MCP server + HTTP Jira REST API, Telegram
+> mirror, GitLab/GitHub integration, and skill/CLI packaging), with 210 tests,
+> ruff + mypy clean, and CI. See [`CHANGELOG.md`](CHANGELOG.md).
+
+## Install
+
+```bash
+pipx install "jira-nano[mcp,http,telegram]"   # surfaces are optional extras
+```
+
+Then run the CLI (`jira-nano --help`) or the MCP server over stdio
+(`jira-nano-mcp`). See [`docs/packaging.md`](docs/packaging.md) for details.
 
 ## Why
 
@@ -26,7 +34,7 @@ email. `jira_nano` inverts that:
 
 ## Features
 
-Highlights below; the full numbered list (all marked *planned*) is in
+Highlights below; the full numbered list is in
 [`docs/features.md`](docs/features.md).
 
 - Git-backed ticket store: one Markdown file per ticket with YAML frontmatter.
