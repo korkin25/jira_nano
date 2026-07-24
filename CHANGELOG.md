@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `JN-35`: git change-feed (`jira_nano.changefeed`) — `diff_tickets` derives
+  semantic events (created / status / assignee / blocked / comment / link) from
+  two ticket states, and `changes_between` derives them from two commits.
 - `JN-15`: forum topic management (`jira_nano.telegram.topics`) — `ensure_topic`
   creates one topic per ticket and persists the ticket↔topic mapping as a
   `telegram` `links[]` entry (reused thereafter); Telegram calls hidden behind a
