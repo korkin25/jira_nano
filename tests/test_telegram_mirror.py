@@ -63,7 +63,7 @@ def test_dispatch_status_changed_renames_and_posts(
     events = [Event("status_changed", t.id, {"from": "todo", "to": "in-progress"})]
     asyncio.run(dispatch_events(service, gateway, _directory(service), events))
     assert gateway.edits[-1][1] == topic_title(service.workflow, service.get(t.id))
-    assert any("in-progress" in text for _, text in gateway.posts)
+    assert any("in-progress" in text for _, text in gateway.cards)
 
 
 def test_dispatch_skips_telegram_comment(
@@ -74,6 +74,7 @@ def test_dispatch_skips_telegram_comment(
         Event("comment_added", t.id, {"author": "k", "body": "hi", "source": "telegram"})
     ]
     asyncio.run(dispatch_events(service, gateway, _directory(service), events))
+    assert gateway.cards == []
     assert gateway.posts == []
 
 
@@ -120,7 +121,7 @@ def test_mirror_since_posts_new_events(
     result = asyncio.run(mirror_since(service, gateway, _directory(service)))
     assert result == new_head
     assert read_cursor(service.conn) == new_head
-    assert any(second.id in text for _, text in gateway.posts)
+    assert any(second.id in text for _, text in gateway.cards)
 
 
 def test_mirror_since_rebaselines_on_unresolvable_cursor(

@@ -21,9 +21,10 @@ from jira_nano.changefeed import Event, changes_between
 from jira_nano.service import TicketService
 from jira_nano.users import UserDirectory
 
+from .banners import banner_for
 from .pings import ping_assignee
-from .topics import TopicGateway, refresh_topic
-from .updates import post_events
+from .topics import TopicGateway, ensure_topic, refresh_topic
+from .updates import render_event
 
 _CURSOR_KEY = "telegram_head_sha"
 
@@ -40,17 +41,28 @@ async def dispatch_events(
     """Mirror a batch of change-feed events into Telegram, in order.
 
     Assignment changes post a single ``@mention`` ping (never an extra update
-    line); status/blocked/created changes first re-sync the topic title, then all
-    other kinds fall through to a normal update post.
+    line); status/blocked/created changes first re-sync the topic title. Every
+    other kind falls through to a status-banner photo card (caption = the
+    rendered event), degrading to a plain text post when no banner matches or the
+    caption exceeds Telegram's 1024-character caption limit.
     """
     for event in events:
         if event.kind == "assignee_changed":
             if event.details.get("to"):
                 await ping_assignee(service, gateway, directory, event.ticket_id)
             continue
+        if event.kind == "comment_added" and event.details.get("source") == "telegram":
+            continue
         if event.kind in _REFRESH_KINDS:
             await refresh_topic(service, gateway, event.ticket_id)
-        await post_events(service, gateway, [event])
+        ticket = service.get(event.ticket_id)
+        topic_id = await ensure_topic(service, gateway, event.ticket_id)
+        caption = render_event(service.workflow, ticket, event)
+        banner = banner_for(ticket)
+        if banner is not None and len(caption) <= 1024:
+            await gateway.post_card(topic_id, banner, caption)
+        else:
+            await gateway.post_message(topic_id, caption)
 
 
 def read_cursor(conn: sqlite3.Connection) -> str | None:

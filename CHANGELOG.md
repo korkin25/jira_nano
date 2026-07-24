@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Telegram **static status banners**: a pre-rendered banner image per status is
+  shipped as a package asset (`telegram/assets/status_<name>.png`); the mirror
+  sends the matching banner as a photo with the ticket details as the caption
+  (`telegram/banners.py`, `TopicGateway.post_card`) — **no runtime image
+  rendering**, it just loads the committed PNG and falls back to a plain text post
+  when no banner matches or the caption exceeds Telegram's 1024-char limit. The
+  banners are regenerated with `scripts/render_status_banners.py` (dev-only,
+  needs Pillow).
 - Telegram **auto-trigger** (`telegram/mirror.py`): `jira-nano-bot` now mirrors
   committed ticket changes automatically. A background poller advances a cursor
   over Git history (`telegram_head_sha` in the cache, separate from the sync

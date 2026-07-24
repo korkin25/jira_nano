@@ -11,6 +11,7 @@ class FakeGateway:
         self.calls: list[str] = []  # created topic names
         self.edits: list[tuple[int, str]] = []  # (topic_id, new name)
         self.posts: list[tuple[int, str]] = []  # (topic_id, text)
+        self.cards: list[tuple[int, str]] = []  # (topic_id, caption)
         self._next = 100
 
     async def create_topic(self, name: str) -> int:
@@ -23,6 +24,9 @@ class FakeGateway:
 
     async def post_message(self, topic_id: int, text: str) -> None:
         self.posts.append((topic_id, text))
+
+    async def post_card(self, topic_id: int, image: bytes, caption: str) -> None:
+        self.cards.append((topic_id, caption))
 
 
 @pytest.fixture

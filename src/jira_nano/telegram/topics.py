@@ -10,6 +10,7 @@ from __future__ import annotations
 from typing import Protocol
 
 from aiogram import Bot
+from aiogram.types import BufferedInputFile
 
 from jira_nano.config import Workflow
 from jira_nano.models import Link, LinkType, Ticket
@@ -29,6 +30,10 @@ class TopicGateway(Protocol):
 
     async def post_message(self, topic_id: int, text: str) -> None:
         """Post a message into a forum topic (pings, update posts; JN-16/JN-18)."""
+        ...
+
+    async def post_card(self, topic_id: int, image: bytes, caption: str) -> None:
+        """Post a status-banner photo with a caption into a forum topic (JN-18)."""
         ...
 
 
@@ -51,6 +56,15 @@ class BotTopicGateway:
     async def post_message(self, topic_id: int, text: str) -> None:
         await self.bot.send_message(
             chat_id=self.chat_id, message_thread_id=topic_id, text=text, parse_mode=PARSE_MODE
+        )
+
+    async def post_card(self, topic_id: int, image: bytes, caption: str) -> None:
+        await self.bot.send_photo(
+            chat_id=self.chat_id,
+            message_thread_id=topic_id,
+            photo=BufferedInputFile(image, "status.png"),
+            caption=caption,
+            parse_mode=PARSE_MODE,
         )
 
 
