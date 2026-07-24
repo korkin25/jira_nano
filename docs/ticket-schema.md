@@ -121,6 +121,7 @@ korkin25:
   gitlab: korkin25
   github: korkin
   email: korkin@example.com
+  # account_id: "opaque-id"   # optional; Jira REST v3 accountId (JN-D5). Default: the handle.
 ```
 
 `users.yaml` lives alongside `workflow.yaml` under `.jira_nano/`. It is **not**

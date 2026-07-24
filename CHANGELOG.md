@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Resolved decision `JN-D5`: HTTP API specced as a drop-in **Jira REST** surface
+  in `docs/http-api.md` — serves **both v2 and v3** dialects (plain-string vs ADF
+  bodies, username vs accountId, classic vs token-paginated search), mirrors the
+  MCP tool surface (`JN-D6`), a pragmatic JQL subset, and Basic + Bearer PAT +
+  OAuth 2.0 auth. Adds an optional `account_id` to the user directory.
 - Resolved decision `JN-D6`: MCP tool surface specced in `docs/mcp-tools.md` —
   copies the `mcp-atlassian` Jira tool shape (names/args) scoped to a git-backed
   tracker; no hard delete (`jira_delete_issue` → `archived`), `jira_` prefix kept
