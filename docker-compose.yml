@@ -1,0 +1,75 @@
+# Local run of jira_nano. `docker compose up` builds the image and serves the
+# HTTP Jira REST API on http://localhost:8080. Data (the git ticket store + the
+# SQLite cache) is persisted in the `data` volume; the git repo is initialised
+# on first start by the `init` one-shot service.
+#
+# The optional Telegram bot and MCP-over-HTTP surfaces are provided as extra
+# services behind the `bot` / `mcp` profiles — enable with
+# `docker compose --profile mcp up`.
+
+services:
+  init:
+    build: .
+    image: ghcr.io/korkin25/jira-nano:latest
+    entrypoint: ["jira-nano", "--repo", "/data/repo", "init"]
+    volumes:
+      - data:/data
+    restart: "no"
+
+  jira-nano:
+    build: .
+    image: ghcr.io/korkin25/jira-nano:latest
+    depends_on:
+      init:
+        condition: service_completed_successfully
+    ports:
+      - "8080:8080"
+    environment:
+      JIRA_NANO_REPO: /data/repo
+      JIRA_NANO_HTTP_HOST: 0.0.0.0
+      JIRA_NANO_HTTP_PORT: "8080"
+      # Point the Whisper cache at the models volume (voice is opt-in; see chart/README.md).
+      HF_HOME: /models
+      XDG_CACHE_HOME: /models
+    volumes:
+      - data:/data
+      - models:/models
+    restart: unless-stopped
+
+  mcp-http:
+    build: .
+    image: ghcr.io/korkin25/jira-nano:latest
+    profiles: ["mcp"]
+    depends_on:
+      init:
+        condition: service_completed_successfully
+    entrypoint: ["jira-nano-mcp-http"]
+    ports:
+      - "8081:8080"
+    environment:
+      JIRA_NANO_REPO: /data/repo
+    volumes:
+      - data:/data
+    restart: unless-stopped
+
+  bot:
+    build: .
+    image: ghcr.io/korkin25/jira-nano:latest
+    profiles: ["bot"]
+    depends_on:
+      init:
+        condition: service_completed_successfully
+    entrypoint: ["jira-nano-bot"]
+    environment:
+      JIRA_NANO_REPO: /data/repo
+      # Provide the bot token via an env file or your shell, e.g. TELEGRAM_BOT_TOKEN.
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - data:/data
+    restart: unless-stopped
+
+volumes:
+  data:
+  models:
