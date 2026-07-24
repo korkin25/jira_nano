@@ -9,9 +9,9 @@ place (`CLAUDE.md`, `README.md`, `docs/`, `CHANGELOG.md`, `LICENSE`,
 **DEVELOPMENT happens in a separate chat** — this session only scaffolds the
 repository.
 
-**Next action:** brainstorm and lock the **status/workflow model** (`JN-D1`,
-draft in `docs/status-model.md`) and **pick the stack/language** (`JN-D2`, e.g.
-Python). Only then start Phase 1.
+**Next action:** **pick the stack/language** (`JN-D2`, e.g. Python) and lock the
+**ticket-file schema** (`JN-D3`). The **status/workflow model** (`JN-D1`) is
+**resolved** — canonical spec in `docs/status-model.md`. Only then start Phase 1.
 
 ## Legend
 
@@ -37,9 +37,9 @@ Python). Only then start Phase 1.
 
 | ID | Decision | Notes |
 |----|----------|-------|
-| JN-D1 | Status/workflow model | Draft + open questions in `docs/status-model.md`; needs brainstorming before Phase 1. |
+| ~~JN-D1~~ | ~~Status/workflow model~~ | **Resolved** — canonical spec in `docs/status-model.md`. |
 | JN-D2 | Stack / language | Proposed: Python (CI already assumes ruff/pytest/bandit/pip-audit). Confirm before Phase 1. |
-| JN-D3 | Ticket-file layout | Exact YAML frontmatter schema + body conventions for `tickets/JN-<n>.md`. |
+| JN-D3 | Ticket-file layout | Exact YAML frontmatter schema + body conventions for `tickets/JN-<n>.md`. `JN-D1` added fields: `blocked`, `blocked_reason`, `resolution`; full schema still open. |
 | JN-D4 | MCP-vs-API priority | Which surface ships first (MCP tools vs HTTP API) given the shared service layer. |
 
 ## Phase 1 — Core (git ticket store + sqlite cache + CRUD + search)

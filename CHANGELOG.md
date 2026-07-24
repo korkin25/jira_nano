@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Resolved decision `JN-D1`: finalized the status/workflow model in
+  `docs/status-model.md` — six states (`todo` initial), `blocked` as an
+  orthogonal flag, forward-only auto-advance on git-host events, strict
+  transitions with a `force` override, a single `assignee` guard on
+  `in-progress`, and per-repository workflow config.
+
 ### Added
 
 - Initial documentation and non-code skeleton: `CLAUDE.md` (project rules,
