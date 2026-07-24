@@ -7,6 +7,9 @@ pull-back) is added in JN-15..JN-19.
 """
 from __future__ import annotations
 
+import os
+from pathlib import Path
+
 from aiogram import Bot, Dispatcher, Router
 from aiogram.types import Message
 
@@ -40,3 +43,13 @@ def build_dispatcher(service: TicketService) -> Dispatcher:
 
     dispatcher.include_router(router)
     return dispatcher
+
+
+def run(repo: Path | None = None) -> None:  # pragma: no cover - bot event loop
+    """Console entry point: run the Telegram bot with long polling."""
+    import asyncio
+
+    root = Path(repo) if repo is not None else Path(os.environ.get("JIRA_NANO_REPO", "."))
+    bot = build_bot(TelegramConfig.from_env())
+    dispatcher = build_dispatcher(TicketService(root))
+    asyncio.run(dispatcher.start_polling(bot))

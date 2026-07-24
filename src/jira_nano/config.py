@@ -95,6 +95,11 @@ def _workflow_from_raw(raw: dict[str, Any]) -> Workflow:
 DEFAULT_WORKFLOW: Workflow = _workflow_from_raw(DEFAULT_WORKFLOW_RAW)
 
 
+def default_workflow_yaml() -> str:
+    """The built-in default workflow serialized for a fresh ``workflow.yaml``."""
+    return yaml.safe_dump({"workflow": DEFAULT_WORKFLOW_RAW}, sort_keys=False, allow_unicode=True)
+
+
 def load_workflow(config_dir: Path) -> Workflow:
     """Load ``workflow.yaml`` or return the built-in default (JN-D1)."""
     path = config_dir / "workflow.yaml"

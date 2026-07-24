@@ -13,6 +13,7 @@ from fastapi.testclient import TestClient
 
 from jira_nano.githost.webhook import (
     GitHostEvent,
+    build_app_from_env,
     build_webhook_app,
     verify_github,
     verify_gitlab,
@@ -87,6 +88,30 @@ def test_github_signature_verified(service: TicketService) -> None:
         "/webhooks/github",
         content=body,
         headers={"X-Hub-Signature-256": sig, "Content-Type": "application/json"},
+    )
+    assert r.status_code == 200
+    assert service.get("JN-1").status is Status.in_review
+
+
+def test_build_app_from_env_wires_parsers(
+    service: TicketService, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("GITLAB_WEBHOOK_SECRET", "gl-secret")
+    service.create(title="x", reporter="e")
+    client = TestClient(build_app_from_env(service))
+    r = client.post(
+        "/webhooks/gitlab",
+        json={
+            "object_kind": "merge_request",
+            "object_attributes": {
+                "action": "open",
+                "title": "JN-1 fix",
+                "iid": 5,
+                "url": "https://x/mr/5",
+            },
+            "user": {"username": "korkin25"},
+        },
+        headers={"X-Gitlab-Token": "gl-secret"},
     )
     assert r.status_code == 200
     assert service.get("JN-1").status is Status.in_review

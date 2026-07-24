@@ -11,17 +11,53 @@ import os
 import sys
 from pathlib import Path
 
+import pygit2
+
+from .config import CONFIG_DIRNAME, TICKETS_DIRNAME, default_workflow_yaml
 from .errors import JiraNanoError
 from .jira.jql import run as run_jql
 from .service import TicketService
 
 REPO_ENV = "JIRA_NANO_REPO"
 
+_USERS_TEMPLATE = """\
+# jira_nano user directory — canonical handle -> platform identities.
+# Tickets reference these handles (assignee / reporter / watchers), and the
+# Telegram/git-host integrations resolve them to platform usernames.
+#
+# yourhandle:
+#   name: "Your Name"
+#   telegram: "@yourhandle"
+#   gitlab: yourhandle
+#   github: yourhandle
+#   email: you@example.com
+"""
+
+
+def _init_repo(root: Path) -> None:
+    """Bootstrap a jira_nano repo: git repo + ``.jira_nano/`` config + ``tickets/``."""
+    root.mkdir(parents=True, exist_ok=True)
+    try:
+        pygit2.Repository(str(root))
+    except pygit2.GitError:
+        pygit2.init_repository(str(root))
+    (root / TICKETS_DIRNAME).mkdir(exist_ok=True)
+    config_dir = root / CONFIG_DIRNAME
+    config_dir.mkdir(exist_ok=True)
+    workflow = config_dir / "workflow.yaml"
+    if not workflow.exists():
+        workflow.write_text(default_workflow_yaml(), encoding="utf-8")
+    users = config_dir / "users.yaml"
+    if not users.exists():
+        users.write_text(_USERS_TEMPLATE, encoding="utf-8")
+
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="jira-nano", description="jira_nano ticket CLI")
     parser.add_argument("--repo", default=os.environ.get(REPO_ENV, "."))
     sub = parser.add_subparsers(dest="command", required=True)
+
+    sub.add_parser("init", help="initialize a jira_nano repo (git + .jira_nano/)")
 
     create = sub.add_parser("create", help="create a ticket")
     create.add_argument("--title", required=True)
@@ -52,7 +88,12 @@ def _build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = _build_parser().parse_args(argv)
-    service = TicketService(Path(args.repo))
+    root = Path(args.repo)
+    if args.command == "init":
+        _init_repo(root)
+        print(f"initialized jira_nano repo at {root}")
+        return 0
+    service = TicketService(root)
     try:
         if args.command == "create":
             ticket = service.create(

@@ -7,6 +7,8 @@ Errors use Jira's ``{"errorMessages": [...], "errors": {...}}`` envelope.
 """
 from __future__ import annotations
 
+import os
+from pathlib import Path
 from typing import Any
 
 from fastapi import Body, FastAPI, Header, HTTPException, Request
@@ -177,3 +179,14 @@ def build_app(service: TicketService, authenticator: Authenticator | None = None
         return {"nextPageToken": None, "isLast": True, "issues": issues}
 
     return app
+
+
+def run(repo: Path | None = None) -> None:  # pragma: no cover - server event loop
+    """Console entry point: serve the HTTP Jira REST API with uvicorn."""
+    import uvicorn
+
+    root = Path(repo) if repo is not None else Path(os.environ.get("JIRA_NANO_REPO", "."))
+    host = os.environ.get("JIRA_NANO_HTTP_HOST", "127.0.0.1")
+    port = int(os.environ.get("JIRA_NANO_HTTP_PORT", "8080"))
+    app = build_app(TicketService(root), Authenticator(Credentials.from_env()))
+    uvicorn.run(app, host=host, port=port)
