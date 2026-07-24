@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `JN-15`: forum topic management (`jira_nano.telegram.topics`) — `ensure_topic`
+  creates one topic per ticket and persists the ticket↔topic mapping as a
+  `telegram` `links[]` entry (reused thereafter); Telegram calls hidden behind a
+  `TopicGateway`.
 - `JN-14`: Telegram bot skeleton (`jira_nano.telegram`, aiogram) — env-based
   config (bot token + forum chat id), `build_bot`, and `build_dispatcher` with
   in-process service access. `aiogram` is an optional extra (`jira-nano[telegram]`).
