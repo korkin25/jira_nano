@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `JN-17`: topic status icons — `topic_title` (status icon + 🚫 blocked overlay)
+  and `topic_color` from the workflow (`JN-D1`); `refresh_topic` renames the forum
+  topic to reflect the current state.
 - `JN-35`: git change-feed (`jira_nano.changefeed`) — `diff_tickets` derives
   semantic events (created / status / assignee / blocked / comment / link) from
   two ticket states, and `changes_between` derives them from two commits.
