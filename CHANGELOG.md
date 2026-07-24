@@ -56,6 +56,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `JN-3`: sequential `JN-<n>` id allocator (`max + 1`, never reused).
 - `JN-2`: git-backed ticket store (pygit2) — read/write/list `tickets/JN-<n>.md`,
   one commit per change, and per-ticket commit history.
 - `JN-4`: SQLite cache schema — full-ticket rows, join tables
