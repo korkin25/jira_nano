@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from .parser import find_ids
+from .parser import collect_commit_ids, find_ids
 from .webhook import GitHostEvent
 
 _MR_ACTIONS = {
@@ -36,14 +36,12 @@ def parse_gitlab(payload: dict[str, Any]) -> GitHostEvent | None:
             author=(payload.get("user") or {}).get("username"),
         )
     if kind == "push":
-        ids: list[str] = []
-        for commit in payload.get("commits", []):
-            for tid in find_ids(commit.get("message", "")):
-                if tid not in ids:
-                    ids.append(tid)
         first = (payload.get("commits") or [{}])[0]
         return GitHostEvent(
-            host="gitlab", kind="push", ids=ids, url=first.get("url"),
+            host="gitlab",
+            kind="push",
+            ids=collect_commit_ids(payload.get("commits", [])),
+            url=first.get("url"),
             author=payload.get("user_username"),
         )
     return None
