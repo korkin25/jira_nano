@@ -62,6 +62,9 @@ extend-immutable-calls = ["fastapi.Body", "fastapi.Header", "fastapi.Query", "fa
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra --strict-markers"
+markers = [
+    "live: end-to-end test against real external accounts (Telegram); opt-in via JIRA_NANO_LIVE=1",
+]
 
 [tool.mypy]
 python_version = "3.11"

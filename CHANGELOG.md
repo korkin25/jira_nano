@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Automated live end-to-end test of the Telegram mirror (`tests/live/`,
+  `live` marker): drives the real mirror code against a configured forum
+  supergroup and cleans up after itself. Opt-in via `JIRA_NANO_LIVE=1` +
+  `TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID`; skipped by default so CI stays green.
 - Telegram rich views (`telegram/views.py`): `render_ticket` (a single-ticket
   field card) and `render_board` (a numbered board/sprint listing), both wrapping
   their structured content in a `<blockquote>` so listings read cleanly. Ticket
