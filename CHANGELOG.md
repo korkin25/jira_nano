@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `JN-22`: GitHub integration (`jira_nano.githost.github.parse_github`) —
+  symmetric to GitLab: normalizes pull-request (opened / merged / closed) and push
+  payloads into `GitHostEvent`.
 - `JN-21`: GitLab integration (`jira_nano.githost.gitlab.parse_gitlab`) —
   normalizes merge-request (open/merge/close) and push payloads into
   `GitHostEvent`; drives linking + transitions end-to-end via the receiver.
