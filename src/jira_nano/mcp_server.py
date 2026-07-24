@@ -6,6 +6,8 @@ the JQL subset (JN-30). Jira-exact naming/shape conformance is polished in JN-12
 """
 from __future__ import annotations
 
+import os
+from pathlib import Path
 from typing import Any
 
 from mcp.server.fastmcp import FastMCP
@@ -15,6 +17,8 @@ from .jira.mapper import to_jira_issue
 from .models import Ticket
 from .service import TicketService
 from .users import UserDirectory
+
+REPO_ENV = "JIRA_NANO_REPO"
 
 
 def build_server(service: TicketService, version: int = 2) -> FastMCP:
@@ -192,3 +196,9 @@ def build_server(service: TicketService, version: int = 2) -> FastMCP:
         return {"users": users}
 
     return server
+
+
+def run(repo: Path | None = None) -> None:  # pragma: no cover - stdio event loop
+    """Console entry point: build the server for a repo and serve it over stdio."""
+    root = Path(repo) if repo is not None else Path(os.environ.get(REPO_ENV, "."))
+    build_server(TicketService(root)).run(transport="stdio")

@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `JN-26`: skill + MCP wiring — a `jira-nano-mcp` console entry point
+  (`jira_nano.mcp_server:run`, stdio), a sample client config (`examples/mcp.json`),
+  and an end-to-end agent-flow test (create → transition → comment → search).
 - `JN-25`: `SKILL.md` — an Agent Skill (agentskills.io format) describing how to
   drive jira_nano via its MCP tools / CLI, with when-to-use triggers; validated by
   tests.
