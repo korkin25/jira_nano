@@ -1,0 +1,148 @@
+---
+# Default values for the jira-nano chart.
+# Adapted from the customers "application" chart, stripped of the BNPL platform
+# coupling (ArgoCD globals, ESO/Vault, GatewayAPI, Liquibase) for a portable
+# GitHub/GHCR deployment.
+
+replicaCount: 1
+
+image:
+  repository: ghcr.io/korkin25/jira-nano
+  # Empty tag ⇒ chart appVersion. Override per environment.
+  tag: ""
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+# The command the main container runs. Default: the HTTP Jira REST API.
+# Alternatives: [jira-nano-mcp-http], [jira-nano-bot], [jira-nano-webhooks].
+command: ["jira-nano-http"]
+args: []
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+automountServiceAccountToken: false
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext:
+  fsGroup: 10000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 10000
+  runAsGroup: 10000
+  capabilities:
+    drop:
+      - ALL
+
+containerPort: 8080
+
+# Non-secret environment. JIRA_NANO_REPO points at the persistent git store.
+env:
+  JIRA_NANO_REPO: /data/repo
+  JIRA_NANO_HTTP_HOST: "0.0.0.0"
+  JIRA_NANO_HTTP_PORT: "8080"
+
+# Extra env from an existing Secret (bot token, HTTP auth creds, …).
+# Create the Secret out-of-band; the chart never templates secret values.
+envFrom:
+  secret:
+    enabled: false
+    name: ""   # defaults to <fullname>-secrets
+
+# No HTTP health endpoint yet → TCP probes on the serving port.
+livenessProbe:
+  enabled: true
+  tcpSocket:
+    port: http
+  initialDelaySeconds: 15
+  periodSeconds: 20
+readinessProbe:
+  enabled: true
+  tcpSocket:
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 10
+startupProbe:
+  enabled: true
+  tcpSocket:
+    port: http
+  failureThreshold: 30
+  periodSeconds: 5
+
+# Persistent git ticket store + SQLite cache (source of record). An initContainer
+# runs `jira-nano --repo <path> init` (idempotent) before the app starts.
+persistence:
+  enabled: true
+  storageClass: ""
+  accessModes: ["ReadWriteOnce"]
+  size: 1Gi
+  mountPath: /data
+  annotations: {}
+
+# Voice/STT (Whisper) model cache. The model is deliberately NOT baked into the
+# image; it lives on this PVC and is fetched on first use or preloaded by devops
+# (`jira-nano-voice-setup`). Env below points the HF/XDG caches at the mount.
+# See chart/README.md § Voice / STT model. Identical pattern in tg_notes.
+voiceModel:
+  enabled: true
+  storageClass: ""
+  accessModes: ["ReadWriteOnce"]
+  size: 2Gi
+  mountPath: /models
+  annotations: {}
+  # existingClaim: ""   # reuse a preloaded PVC instead of creating one
+
+service:
+  enabled: true
+  type: ClusterIP
+  port: 80
+  annotations: {}
+  labels: {}
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: jira-nano.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+# Prometheus Operator ServiceMonitor (off by default; enable where the CRD exists).
+serviceMonitor:
+  enabled: false
+  path: /metrics
+  interval: 30s
+  labels: {}
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+
+podDisruptionBudget:
+  enabled: false
+  minAvailable: 1
+  maxUnavailable: ""
+
+resources: {}
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+extraVolumes: []
+extraVolumeMounts: []
