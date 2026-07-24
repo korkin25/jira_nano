@@ -131,7 +131,9 @@ A single service layer backs two front doors with the same operation set:
   drop-in. It is the flagship surface, built first to validate the core value and
   to dogfood (agents manage `jira_nano` tickets over MCP).
 - **HTTP API (follows):** the same operations for **external** non-MCP clients
-  (scripts, third-party integrations).
+  (scripts, third-party integrations). A **goal is full compatibility with the
+  Jira REST API** so existing Jira clients are drop-in; exact endpoint set and
+  API version are an open decision (`JN-D5`, to discuss before `JN-13`).
 - **Internal components are in-process.** The Telegram bot and Git-host event
   handlers invoke the service layer **directly**, not via HTTP. A webhook receiver
   listens over HTTP to *receive* events but handles them through the service
