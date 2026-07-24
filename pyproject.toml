@@ -20,6 +20,7 @@ dependencies = [
 [project.scripts]
 jira-nano = "jira_nano.cli:main"
 jira-nano-mcp = "jira_nano.mcp_server:run"
+jira-nano-mcp-http = "jira_nano.mcp_server:run_http"
 
 [project.optional-dependencies]
 mcp = ["mcp>=1.2"]                       # JN-11: MCP server (FastMCP)

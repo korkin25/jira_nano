@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from mcp.server.fastmcp import FastMCP
+from starlette.applications import Starlette
 
 from .jira.jql import run as run_jql
 from .jira.mapper import to_jira_issue
@@ -202,3 +203,14 @@ def run(repo: Path | None = None) -> None:  # pragma: no cover - stdio event loo
     """Console entry point: build the server for a repo and serve it over stdio."""
     root = Path(repo) if repo is not None else Path(os.environ.get(REPO_ENV, "."))
     build_server(TicketService(root)).run(transport="stdio")
+
+
+def http_app(service: TicketService, version: int = 2) -> Starlette:
+    """ASGI app serving the MCP server over remote streamable-HTTP (JN-34)."""
+    return build_server(service, version).streamable_http_app()
+
+
+def run_http(repo: Path | None = None) -> None:  # pragma: no cover - server event loop
+    """Console entry point: serve the MCP server over remote streamable-HTTP."""
+    root = Path(repo) if repo is not None else Path(os.environ.get(REPO_ENV, "."))
+    build_server(TicketService(root)).run(transport="streamable-http")

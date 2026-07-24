@@ -28,6 +28,7 @@ pipx install "jira-nano[mcp,http,telegram]"  # everything
 |---------|---------|
 | `jira-nano` | CLI over the service layer (`create`/`get`/`list`/`search`/`transition`/`assign`/`comment`/`board`) — `JN-38` |
 | `jira-nano-mcp` | run the MCP server over stdio (`JIRA_NANO_REPO` selects the repo) — `JN-26` |
+| `jira-nano-mcp-http` | run the MCP server over remote streamable-HTTP — `JN-34` |
 
 The HTTP API and Telegram bot are run from their app factories
 (`jira_nano.http.app:build_app`, `jira_nano.telegram.bot:build_dispatcher`).
