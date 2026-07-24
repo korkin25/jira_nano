@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-07-24
+
 ### Changed
 
 - `jira-nano-http` and `jira-nano-webhooks` now bind all interfaces (`0.0.0.0`)
