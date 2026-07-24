@@ -24,6 +24,7 @@ jira-nano-mcp-http = "jira_nano.mcp_server:run_http"
 jira-nano-http = "jira_nano.http.app:run"
 jira-nano-bot = "jira_nano.telegram.bot:run"
 jira-nano-webhooks = "jira_nano.githost.webhook:run"
+jira-nano-voice-setup = "jira_nano.telegram.transcribe:preload"
 
 [project.optional-dependencies]
 mcp = ["mcp>=1.2"]                       # JN-11: MCP server (FastMCP)

@@ -15,7 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   original audio message is deleted. The STT backend is pluggable — the default
   runs a local Whisper model (`faster-whisper`, `[voice]` extra, loaded on demand)
   and an optional cloud backend uses OpenAI (`JIRA_NANO_STT=cloud`). Heavy libs
-  are lazy-imported, so the package still imports and runs without them.
+  are lazy-imported, so the package still imports and runs without them. The bot
+  provisions the local model at startup (cached on disk afterwards, no manual
+  step) — `jira-nano-voice-setup` pre-fetches it explicitly — and the backend
+  auto-selects cloud when `OPENAI_API_KEY` is set, else the portable local Whisper.
 - Telegram **static status banners**: a pre-rendered banner image per status is
   shipped as a package asset (`telegram/assets/status_<name>.png`); the mirror
   sends the matching banner as a photo with the ticket details as the caption
