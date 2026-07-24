@@ -15,6 +15,8 @@ from jira_nano.config import Workflow
 from jira_nano.models import Link, LinkType, Ticket
 from jira_nano.service import TicketService
 
+from .format import PARSE_MODE
+
 
 class TopicGateway(Protocol):
     async def create_topic(self, name: str) -> int:
@@ -47,7 +49,9 @@ class BotTopicGateway:
         )
 
     async def post_message(self, topic_id: int, text: str) -> None:
-        await self.bot.send_message(chat_id=self.chat_id, message_thread_id=topic_id, text=text)
+        await self.bot.send_message(
+            chat_id=self.chat_id, message_thread_id=topic_id, text=text, parse_mode=PARSE_MODE
+        )
 
 
 def topic_name(ticket: Ticket) -> str:

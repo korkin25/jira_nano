@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Telegram mirror: message bodies (assignment pings, update posts) are sent as
+  HTML with the ticket id rendered **monospace** so it is easy to copy; other
+  dynamic text is HTML-escaped. Forum topic names stay plain text (a future
+  change can turn the id into a deep link — see `telegram/format.py:ticket_ref`).
+
 ## [0.4.1] - 2026-07-24
 
 ### Changed
