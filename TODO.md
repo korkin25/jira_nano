@@ -9,7 +9,7 @@ place (`CLAUDE.md`, `README.md`, `docs/`, `CHANGELOG.md`, `LICENSE`,
 
 **Implementation is underway** (TDD; a feature branch per task, merged to `main`
 when the suite is green). Done: `JN-1` (models + serialization), `JN-28` (config
-+ user directory), `JN-4` (cache schema). **Next: `JN-2`.**
++ user directory), `JN-4` (cache schema), `JN-2` (git store). **Next: `JN-3`.**
 
 **All planning decisions are resolved:**
 
@@ -20,7 +20,7 @@ when the suite is green). Done: `JN-1` (models + serialization), `JN-28` (config
 - `JN-D5` — HTTP API = drop-in **Jira REST** (v2 + v3) → `docs/http-api.md`
 - `JN-D6` — MCP tool surface (copies Jira MCP servers) → `docs/mcp-tools.md`
 
-**Next action:** implement **`JN-2`** (git ticket store, pygit2), TDD.
+**Next action:** implement **`JN-3`** (sequential id allocator), TDD.
 
 ## Legend
 
@@ -44,8 +44,8 @@ when the suite is green). Done: `JN-1` (models + serialization), `JN-28` (config
 
 ## Phase 1 — Core (git ticket store + sqlite cache + CRUD + search)
 
-> **Suggested order:** `JN-2` → `JN-3` → `JN-5` → `JN-6` → `JN-29` → `JN-7` →
-> `JN-8`. (`JN-1`, `JN-28`, `JN-4` ✅ done — see `CHANGELOG.md`.)
+> **Suggested order:** `JN-3` → `JN-5` → `JN-6` → `JN-29` → `JN-7` → `JN-8`.
+> (`JN-1`, `JN-28`, `JN-4`, `JN-2` ✅ done — see `CHANGELOG.md`.)
 > **Conventions:** **Git is the single source of truth**; the local SQLite cache
 > mirrors everything (tickets + users) for speed and serves **all** reads
 > (`get`/`list`/`search`/`board`). **Writes commit to Git first, then update the
@@ -56,7 +56,6 @@ when the suite is green). Done: `JN-1` (models + serialization), `JN-28` (config
 
 | ID | Status | Task | Details |
 |----|--------|------|---------|
-| JN-2 | ⬜ | Git ticket store (**pygit2**) | Read/write/list `tickets/JN-<n>.md`; commit per change (Conventional-Commit w/ id); read history. |
 | JN-3 | ⬜ | Ticket id allocation | Sequential `JN-<n>` (max+1), never reused; lock for concurrent creates. |
 | JN-5 | ⬜ | Cache rebuild | Full rebuild from `tickets/*.md` + `.jira_nano/` (users/workflow); idempotent. |
 | JN-6 | ⬜ | Cache incremental upsert | Upsert one ticket's rows (or a user) after a local write, no full walk. |
