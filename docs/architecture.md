@@ -73,11 +73,12 @@ Notes:
 
 ### 2.2 SQLite cache (derived, rebuildable)
 
-The cache mirrors ticket frontmatter **and the user directory
-(`.jira_nano/users.yaml`)** into indexed tables so search, filtering, board
-queries, and identity lookups are fast without scanning every file. It holds no
-state that cannot be regenerated — the user directory, like tickets, is the
-source of record in Git and is only cached here for speed.
+The cache mirrors the **full ticket** (frontmatter, body, and comments) **and the
+user directory (`.jira_nano/users.yaml`)** into indexed tables, so **all reads** —
+`get`, search, filtering, board, and identity lookups — are served locally
+without scanning files. **Git is the single source of truth**; the working-tree
+files and this cache are both local copies for speed, and the cache holds no state
+that cannot be regenerated from Git.
 
 - **Rebuild:** a full rebuild walks `tickets/*.md` **and `.jira_nano/`
   (`users.yaml`, `workflow.yaml`)**, parses them, and repopulates the tables.
@@ -85,6 +86,8 @@ source of record in Git and is only cached here for speed.
   changes (e.g. `git pull`).
 - **Incremental update:** after a local write, the affected row is upserted so
   the cache stays hot without a full walk.
+- **Write ordering:** a mutation commits to Git **first**; the cache is upserted
+  only after the commit succeeds, so the cache is never ahead of Git.
 - **Background sync:** a background task keeps the cache consistent with Git — it
   compares the cache's last-synced commit SHA against the repo `HEAD`, diffs the
   changed files via **pygit2**, and upserts them; it also picks up uncommitted
