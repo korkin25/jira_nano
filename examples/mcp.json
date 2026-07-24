@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "jira_nano": {
+      "command": "jira-nano-mcp",
+      "env": {
+        "JIRA_NANO_REPO": "/path/to/your/ticket/repo"
+      }
+    }
+  }
+}

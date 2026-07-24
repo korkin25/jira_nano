@@ -29,7 +29,8 @@ posts, comment pull-back).
 `JN-36`, `JN-21`, `JN-22`, `JN-37` (parser, event→transition, link writer, webhook
 receiver, GitLab, GitHub, polling).
 
-**Phase 5 started:** `JN-25` (`SKILL.md`) done. **Next: `JN-26`.**
+**Phase 5 in progress:** `JN-25` (`SKILL.md`), `JN-26` (skill + MCP wiring) done.
+**Next: `JN-38`.**
 
 **All planning decisions are resolved:**
 
@@ -40,7 +41,7 @@ receiver, GitLab, GitHub, polling).
 - `JN-D5` — HTTP API = drop-in **Jira REST** (v2 + v3) → `docs/http-api.md`
 - `JN-D6` — MCP tool surface (copies Jira MCP servers) → `docs/mcp-tools.md`
 
-**Next action:** implement **`JN-26`** (skill + MCP wiring), TDD.
+**Next action:** implement **`JN-38`** (CLI), TDD.
 
 ## Legend
 
@@ -78,10 +79,9 @@ receiver, GitLab, GitHub, polling).
 
 ## Phase 5 — Skill packaging
 
-> **Order:** `JN-26` → `JN-38` → `JN-27`. (`JN-25` ✅ done.)
+> **Order:** `JN-38` → `JN-27`. (`JN-25`, `JN-26` ✅ done.)
 
 | ID | Status | Task | Details |
 |----|--------|------|---------|
-| JN-26 | ⬜ | Skill + MCP wiring | Skill instructs agents to use the MCP server; example flows; bundle MCP config. |
 | JN-38 | ⬜ | CLI | Thin CLI over the service layer for humans/scripts (used by the skill and packaging). |
 | JN-27 | ⬜ | Packaging/distribution | Installable bundle (skill + MCP entrypoint) via `uv tool`/pipx; single-file build eval (`JN-D2`); publish steps. |
