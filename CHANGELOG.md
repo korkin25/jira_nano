@@ -56,6 +56,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `JN-29`: background cache sync — detects external git changes (stored HEAD sha
+  + pygit2 diff) and uncommitted working-tree edits, and refreshes the cache
+  incrementally (full rebuild on first run).
 - `JN-6`: incremental cache upsert — a single ticket (or user) update replaces
   its row, join rows, and FTS entry without a full walk; siblings untouched.
 - `JN-5`: full cache rebuild from `tickets/*.md` + `.jira_nano/users.yaml`
