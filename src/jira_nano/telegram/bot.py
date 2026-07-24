@@ -24,7 +24,7 @@ from .config import TelegramConfig
 from .mirror import mirror_since
 from .pullback import pull_back
 from .topics import BotTopicGateway
-from .transcribe import Transcriber, build_transcriber
+from .transcribe import LocalWhisperTranscriber, Transcriber, build_transcriber
 from .voice import transcribe_voice
 
 
@@ -111,7 +111,18 @@ def run(repo: Path | None = None) -> None:  # pragma: no cover - bot event loop
     bot = build_bot(config)
     service = TicketService(root)
     directory = UserDirectory.load(service.paths.config_dir)
-    dispatcher = build_dispatcher(service)
+    # JN-44: provision the local Whisper model at startup so the first voice
+    # message doesn't wait on the one-time download (the model is cached on disk
+    # afterwards). The cloud backend needs nothing; a missing [voice] extra just
+    # disables voice instead of crashing the bot.
+    transcriber = build_transcriber()
+    if isinstance(transcriber, LocalWhisperTranscriber):
+        try:
+            print("jira_nano: preparing local Whisper model (one-time)…", file=sys.stderr)
+            transcriber.ensure_model()
+        except RuntimeError as exc:
+            print(f"jira_nano: voice transcription disabled — {exc}", file=sys.stderr)
+    dispatcher = build_dispatcher(service, transcriber)
 
     async def _main() -> None:
         if config.chat_id is None:

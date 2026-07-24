@@ -42,16 +42,21 @@ class LocalWhisperTranscriber:
         self._model_name = model or os.environ.get("JIRA_NANO_WHISPER_MODEL", "base")
         self._model: Any = None  # lazy WhisperModel handle, built on first transcribe
 
-    def transcribe(self, audio: bytes, mime: str | None = None) -> str:
-        """Transcribe ``audio`` with a locally-run Whisper model."""
+    def ensure_model(self) -> None:
+        """Load the Whisper model now, triggering the one-time model download."""
+        if self._model is not None:
+            return
         try:
             from faster_whisper import WhisperModel
         except ImportError as exc:  # pragma: no cover - only without the optional extra
             raise RuntimeError(
                 'faster-whisper is not installed; run: pip install "jira-nano[voice]"'
             ) from exc
-        if self._model is None:
-            self._model = WhisperModel(self._model_name)
+        self._model = WhisperModel(self._model_name)
+
+    def transcribe(self, audio: bytes, mime: str | None = None) -> str:
+        """Transcribe ``audio`` with a locally-run Whisper model."""
+        self.ensure_model()
         suffix = _suffix_for(mime)
         # ``delete=False`` so the file survives the ``with`` block for Whisper to
         # read by path; we unlink it ourselves in the ``finally``.
@@ -86,11 +91,29 @@ class CloudTranscriber:
 
 
 def build_transcriber() -> Transcriber:
-    """Select the STT backend from ``JIRA_NANO_STT`` (``cloud`` → OpenAI, else local).
+    """Select the STT backend from ``JIRA_NANO_STT`` (``auto`` | ``local`` | ``cloud``).
 
-    Instantiation is cheap and import-safe: the heavy libraries are only imported
-    when :meth:`Transcriber.transcribe` actually runs.
+    ``auto`` (the default) uses the cloud backend when ``OPENAI_API_KEY`` is set,
+    otherwise the portable local Whisper. Instantiation is cheap and import-safe:
+    the heavy libraries are only imported when :meth:`Transcriber.transcribe` runs.
     """
-    if os.environ.get("JIRA_NANO_STT") == "cloud":
+    mode = os.environ.get("JIRA_NANO_STT", "auto").lower()
+    if mode == "cloud":
+        return CloudTranscriber()
+    if mode == "local":
+        return LocalWhisperTranscriber()
+    if os.environ.get("OPENAI_API_KEY"):  # auto: prefer cloud when a key is configured
         return CloudTranscriber()
     return LocalWhisperTranscriber()
+
+
+def preload() -> None:  # pragma: no cover - downloads/loads the Whisper model
+    """Console entry point (``jira-nano-voice-setup``): fetch the local model once.
+
+    Instantiates the local backend and forces the Whisper model to load so the
+    (possibly large) download happens up front — after this the bot transcribes
+    offline. Requires the ``[voice]`` extra.
+    """
+    backend = LocalWhisperTranscriber()
+    backend.ensure_model()
+    print(f"jira_nano: local Whisper model '{backend._model_name}' is ready")

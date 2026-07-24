@@ -51,6 +51,11 @@ implemented, TDD, and merged. Nothing deferred.
   via a pluggable STT backend → pull the text into the ticket as a comment →
   delete the original audio — **done**, merged (default local Whisper via the
   `[voice]` extra, loaded on demand; optional OpenAI cloud via `JIRA_NANO_STT=cloud`).
+- `JN-44` — **Portable voice / turnkey model**: `jira-nano-bot` provisions the
+  local Whisper model at startup (cached on disk, no manual step) with
+  `jira-nano-voice-setup` for explicit pre-fetch; `build_transcriber` auto-selects
+  cloud when `OPENAI_API_KEY` is set, else the portable local Whisper — **done**,
+  merged.
 
 **All planning decisions are resolved:**
 

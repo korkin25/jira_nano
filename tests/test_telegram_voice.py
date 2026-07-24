@@ -95,9 +95,22 @@ def test_transcribe_voice_unknown_user_falls_back(
 
 def test_build_transcriber_default(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("JIRA_NANO_STT", raising=False)
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     assert isinstance(build_transcriber(), LocalWhisperTranscriber)
 
 
 def test_build_transcriber_cloud(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("JIRA_NANO_STT", "cloud")
+    assert isinstance(build_transcriber(), CloudTranscriber)
+
+
+def test_build_transcriber_local_forces_local(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("JIRA_NANO_STT", "local")
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test")  # ignored when local is forced
+    assert isinstance(build_transcriber(), LocalWhisperTranscriber)
+
+
+def test_build_transcriber_auto_prefers_cloud_with_key(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("JIRA_NANO_STT", raising=False)  # auto
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
     assert isinstance(build_transcriber(), CloudTranscriber)
