@@ -21,9 +21,9 @@ CI runs the real suite.
 service layer. `JN-34` (remote MCP streamable-HTTP transport) is a deferred
 runtime add-on.
 
-**Phase 3 in progress:** `JN-14` (skeleton), `JN-15` (topics), `JN-35`
-(change-feed), `JN-17` (icons), `JN-16` (pings), `JN-18` (update posts) done.
-**Next: `JN-19` (last Phase 3).**
+**Phase 3 (Telegram mirror) is COMPLETE** — `JN-14`, `JN-15`, `JN-35`, `JN-17`,
+`JN-16`, `JN-18`, `JN-19` (skeleton, topics, change-feed, icons, pings, update
+posts, comment pull-back). **Next: Phase 4 (`JN-20`, git-host integration).**
 
 **All planning decisions are resolved:**
 
@@ -34,7 +34,7 @@ runtime add-on.
 - `JN-D5` — HTTP API = drop-in **Jira REST** (v2 + v3) → `docs/http-api.md`
 - `JN-D6` — MCP tool surface (copies Jira MCP servers) → `docs/mcp-tools.md`
 
-**Next action:** implement **`JN-19`** (comment pull-back) — completes Phase 3.
+**Next action:** start **Phase 4** — implement **`JN-20`** (`JN-<n>` parser), TDD.
 
 ## Legend
 
@@ -69,18 +69,6 @@ runtime add-on.
 | ID | Status | Task | Details |
 |----|--------|------|---------|
 | JN-34 | ⬜ | MCP streamable-HTTP transport | Deferred add-on: expose the MCP server (`JN-11`) over remote streamable-HTTP in addition to stdio. |
-
-## Phase 3 — Telegram bot mirror
-
-> **Remaining:** `JN-19`. (`JN-14`, `JN-15`, `JN-35`, `JN-17`, `JN-16`, `JN-18` ✅ done.)
-> The bot is an internal component — it calls the service layer **in-process**
-> (`JN-D4`) and reacts to committed ticket changes via the git change-feed
-> (`JN-35`), so it mirrors changes from every source (MCP/HTTP/CLI/git pull). The
-> ticket↔topic mapping is stored as a `links[]` entry on the ticket.
-
-| ID | Status | Task | Details |
-|----|--------|------|---------|
-| JN-19 | ⬜ | Comment pull-back | Human topic message → `comment` via the service (commit-first→cache), `source=telegram`, author via `users.yaml`. |
 
 ## Phase 4 — Git-host integration (GitLab / GitHub)
 

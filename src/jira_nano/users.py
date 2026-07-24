@@ -63,3 +63,11 @@ class UserDirectory:
     def all_users(self) -> list[User]:
         """Return every user in the directory."""
         return list(self._users.values())
+
+    def by_telegram(self, username: str) -> User | None:
+        """Find a user by their Telegram username (``@`` and case insensitive)."""
+        target = username.lstrip("@").lower()
+        for user in self._users.values():
+            if user.telegram and user.telegram.lstrip("@").lower() == target:
+                return user
+        return None
