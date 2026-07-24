@@ -9,9 +9,11 @@ place (`CLAUDE.md`, `README.md`, `docs/`, `CHANGELOG.md`, `LICENSE`,
 **DEVELOPMENT happens in a separate chat** — this session only scaffolds the
 repository.
 
-**Next action:** lock the **ticket-file schema** (`JN-D3`), then start Phase 1.
-`JN-D1` (status/workflow model, `docs/status-model.md`) and `JN-D2` (stack =
-**Python**, `docs/architecture.md` §8) are both **resolved**.
+**Next action:** **start Phase 1** — all Phase-1-blocking decisions are resolved:
+`JN-D1` (workflow, `docs/status-model.md`), `JN-D2` (stack = **Python**,
+`docs/architecture.md` §8), `JN-D3` (ticket schema, `docs/ticket-schema.md`).
+`JN-D4` (MCP-vs-API priority) stays open but only affects Phase 2 ordering.
+(Reminder: implementation happens in the separate dev chat.)
 
 ## Legend
 
@@ -39,14 +41,14 @@ repository.
 |----|----------|-------|
 | ~~JN-D1~~ | ~~Status/workflow model~~ | **Resolved** — canonical spec in `docs/status-model.md`. |
 | ~~JN-D2~~ | ~~Stack / language~~ | **Resolved** — Python 3.11/3.12; stack in `docs/architecture.md` §8. |
-| JN-D3 | Ticket-file layout | Exact YAML frontmatter schema + body conventions for `tickets/JN-<n>.md`. `JN-D1` added fields `blocked`, `blocked_reason`, `resolution`; full schema still open. |
+| ~~JN-D3~~ | ~~Ticket-file layout~~ | **Resolved** — canonical schema in `docs/ticket-schema.md`. |
 | JN-D4 | MCP-vs-API priority | Which surface ships first (MCP tools vs HTTP API) given the shared service layer. |
 
 ## Phase 1 — Core (git ticket store + sqlite cache + CRUD + search)
 
 | ID | Status | Task | Details |
 |----|--------|------|---------|
-| JN-1 | ⬜ | Ticket-file schema | Define YAML frontmatter + body layout (resolves `JN-D3`). |
+| JN-1 | ⬜ | Ticket-file schema | Implement parse/serialize/validate per `docs/ticket-schema.md` (spec locked by `JN-D3`). |
 | JN-2 | ⬜ | Git ticket store | Read/write/parse `tickets/JN-<n>.md`; commit per change. |
 | JN-3 | ⬜ | Ticket id allocation | Sequential `JN-<n>` allocator, never reused. |
 | JN-4 | ⬜ | SQLite cache schema | Tables/indexes mirroring frontmatter. |

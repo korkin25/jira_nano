@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Resolved decision `JN-D3`: canonical ticket-file schema in
+  `docs/ticket-schema.md` — `JN-<n>.md` frontmatter (`type`/`parent` hierarchy,
+  single `assignee` + `reporter` + `watchers`, four-level `priority`, `blocked`
+  flag, `links`, ISO-8601 UTC timestamps), canonical-handle identities resolved
+  via `.jira_nano/users.yaml`, and an append-only HTML-comment-delimited comment
+  log.
 - Resolved decision `JN-D2`: implementation language is **Python** (3.11/3.12);
   default stack (FastMCP, FastAPI, aiogram, stdlib `sqlite3`, `uv`) documented in
   `docs/architecture.md` §8.

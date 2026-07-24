@@ -35,20 +35,20 @@ fields; the Markdown body carries the description and comment log.
 ```markdown
 ---
 id: JN-123
+type: task
 title: Short human-readable summary
 status: in-progress
-assignee: korkin25
-labels: [backend, telegram]
 priority: high
+assignee: korkin25
+reporter: eugeny
+watchers: [eugeny, ivanov]
+labels: [backend, telegram]
+blocked: false
+parent: JN-100
+links:
+  - {type: mr, host: gitlab, url: "https://gitlab.com/acme/proj/-/merge_requests/42", ref: "!42"}
 created: 2026-07-24T09:00:00Z
 updated: 2026-07-24T12:30:00Z
-links:
-  - type: mr
-    host: gitlab
-    url: https://gitlab.com/acme/proj/-/merge_requests/42
-  - type: commit
-    host: github
-    url: https://github.com/acme/proj/commit/abc1234
 ---
 
 ## Description
@@ -57,14 +57,15 @@ Free-form Markdown body.
 
 ## Comments
 
-- 2026-07-24T12:30:00Z @korkin25 (telegram): pulled-back comment text.
+<!-- c id=1 author=korkin25 source=telegram at=2026-07-24T12:30:00Z -->
+Pulled-back comment text.
 ```
 
 Notes:
 
-- **Frontmatter schema (draft):** `id`, `title`, `status`, `assignee`,
-  `labels`, `priority`, `created`, `updated`, `links`. Exact layout is an open
-  decision (`JN-D3`).
+- **Frontmatter schema:** canonical, resolved in `docs/ticket-schema.md`
+  (`JN-D3`). Identities are canonical handles resolved via
+  `.jira_nano/users.yaml`; the comment log uses HTML-comment-delimited blocks.
 - **Git history is the audit trail.** Who changed what and when is answered by
   `git log`/`git blame` on the ticket file — no separate audit store.
 - **Atomicity.** Each logical change (create, transition, comment, assign) is one
