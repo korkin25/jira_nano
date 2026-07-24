@@ -56,6 +56,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `JN-5`: full cache rebuild from `tickets/*.md` + `.jira_nano/users.yaml`
+  (idempotent), plus the shared cache row writers `upsert_ticket` / `upsert_user`.
 - `JN-3`: sequential `JN-<n>` id allocator (`max + 1`, never reused).
 - `JN-2`: git-backed ticket store (pygit2) — read/write/list `tickets/JN-<n>.md`,
   one commit per change, and per-ticket commit history.
