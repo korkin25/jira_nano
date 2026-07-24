@@ -46,7 +46,7 @@ jobs:
           pip install -e .
           pip install bandit pip-audit
       - name: Bandit
-        run: bandit -r src
+        run: bandit -c pyproject.toml -r src
       - name: pip-audit
         run: pip-audit
 
