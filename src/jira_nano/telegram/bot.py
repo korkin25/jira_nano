@@ -8,16 +8,20 @@ pull-back) is added in JN-15..JN-19.
 from __future__ import annotations
 
 import os
+import sys
 from pathlib import Path
 
 from aiogram import Bot, Dispatcher, Router
 from aiogram.types import Message
 
 from jira_nano.service import TicketService
+from jira_nano.sync import sync_once
 from jira_nano.users import UserDirectory
 
 from .config import TelegramConfig
+from .mirror import mirror_since
 from .pullback import pull_back
+from .topics import BotTopicGateway
 
 
 def build_bot(config: TelegramConfig) -> Bot:
@@ -46,10 +50,40 @@ def build_dispatcher(service: TicketService) -> Dispatcher:
 
 
 def run(repo: Path | None = None) -> None:  # pragma: no cover - bot event loop
-    """Console entry point: run the Telegram bot with long polling."""
+    """Console entry point: run the bot (dispatcher polling + change-feed mirror).
+
+    The aiogram dispatcher (which pulls human comments back from Telegram) and a
+    background poller (which mirrors committed ticket changes out to Telegram) run
+    concurrently. The mirror needs a target chat, so it is skipped when
+    ``TELEGRAM_CHAT_ID`` is unset — the dispatcher still runs on its own.
+    """
     import asyncio
 
     root = Path(repo) if repo is not None else Path(os.environ.get("JIRA_NANO_REPO", "."))
-    bot = build_bot(TelegramConfig.from_env())
-    dispatcher = build_dispatcher(TicketService(root))
-    asyncio.run(dispatcher.start_polling(bot))
+    config = TelegramConfig.from_env()
+    bot = build_bot(config)
+    service = TicketService(root)
+    directory = UserDirectory.load(service.paths.config_dir)
+    dispatcher = build_dispatcher(service)
+
+    async def _main() -> None:
+        if config.chat_id is None:
+            print(
+                "jira_nano: Telegram mirror disabled (TELEGRAM_CHAT_ID is not set)",
+                file=sys.stderr,
+            )
+            await dispatcher.start_polling(bot)
+            return
+        gateway = BotTopicGateway(bot, config.chat_id)
+        interval = float(os.environ.get("JIRA_NANO_MIRROR_INTERVAL", "3.0"))
+
+        async def _poll() -> None:
+            while True:
+                # Refresh the cache first so ``service.get`` sees fresh data.
+                sync_once(root)
+                await mirror_since(service, gateway, directory)
+                await asyncio.sleep(interval)
+
+        await asyncio.gather(dispatcher.start_polling(bot), _poll())
+
+    asyncio.run(_main())

@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Telegram **auto-trigger** (`telegram/mirror.py`): `jira-nano-bot` now mirrors
+  committed ticket changes automatically. A background poller advances a cursor
+  over Git history (`telegram_head_sha` in the cache, separate from the sync
+  cursor) and turns each new committed change into the right side effect —
+  assignment pings, forum-topic renames on status/blocked changes, and update
+  posts. It baselines on first run (no history replay) and self-heals a rewritten
+  history. Runs alongside comment pull-back; skipped when `TELEGRAM_CHAT_ID` is
+  unset. Poll interval via `JIRA_NANO_MIRROR_INTERVAL` (default 3s).
 - Automated live end-to-end test of the Telegram mirror (`tests/live/`,
   `live` marker): drives the real mirror code against a configured forum
   supergroup and cleans up after itself. Opt-in via `JIRA_NANO_LIVE=1` +
