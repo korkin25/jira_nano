@@ -49,7 +49,8 @@ implemented, TDD, and merged. Nothing deferred.
   opt-in via `JIRA_NANO_LIVE=1` — **done**, merged.
 - `JN-43` — **Voice-message transcription**: voice reply in a topic → transcribe
   via a pluggable STT backend → pull the text into the ticket as a comment →
-  delete the original audio — **pending** (needs an STT-backend decision).
+  delete the original audio — **done**, merged (default local Whisper via the
+  `[voice]` extra, loaded on demand; optional OpenAI cloud via `JIRA_NANO_STT=cloud`).
 
 **All planning decisions are resolved:**
 
