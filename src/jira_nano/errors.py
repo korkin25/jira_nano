@@ -20,3 +20,7 @@ class UnknownHandleError(ValidationError):
 
 class TransitionError(JiraNanoError):
     """An illegal workflow transition was attempted (Phase 2 / JN-10 / JN-D1)."""
+
+
+class JqlError(JiraNanoError):
+    """A JQL query could not be parsed or referenced an unsupported field (JN-30)."""

@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `JN-11`: MCP server (`jira_nano.mcp_server.build_server`, FastMCP/stdio) — thin
+  tools over the service returning Jira-shaped issues; search via the JQL subset.
+  `mcp` is an optional dependency (`jira-nano[mcp]`), keeping the core lightweight.
+- `JN-30`: JQL subset parser + executor (`jira_nano.jira.jql`) — fields, `=`/`!=`/
+  `~`/`IN`, `AND`/`OR`, and `ORDER BY`, compiled to SQL over the cache.
 - `JN-33`: Jira issue field mapper (`jira_nano.jira.mapper`) — `to_jira_issue`
   (v2/v3 dialects: string vs ADF body, username vs accountId, statusCategory,
   Flagged, resolution, parent, comments) and `fields_from_jira`.
