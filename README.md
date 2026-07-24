@@ -22,8 +22,10 @@ Or straight from source (e.g. unreleased changes):
 `pipx install "jira-nano[mcp,http,telegram] @ git+https://github.com/korkin25/jira_nano.git"`.
 
 Then run the CLI (`jira-nano --help`) or the MCP server over stdio
-(`jira-nano-mcp`). Release & publishing details are in
-[`docs/packaging.md`](docs/packaging.md).
+(`jira-nano-mcp`). **Full hands-on setup** for every surface (MCP, HTTP API,
+Telegram, GitLab/GitHub) is in
+[`docs/install-guide.md`](docs/install-guide.md); release & publishing details
+are in [`docs/packaging.md`](docs/packaging.md).
 
 ## Why
 
