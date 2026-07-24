@@ -50,7 +50,12 @@ def diff_tickets(old: Ticket | None, new: Ticket) -> list[Event]:
                 Event(
                     "comment_added",
                     new.id,
-                    {"comment_id": comment.id, "author": comment.author, "body": comment.body},
+                    {
+                        "comment_id": comment.id,
+                        "author": comment.author,
+                        "body": comment.body,
+                        "source": comment.source,
+                    },
                 )
             )
 

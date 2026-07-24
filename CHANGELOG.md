@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `JN-18`: update posts (`jira_nano.telegram.updates`) — `format_event` renders a
+  change-feed event and `post_events` posts each into its ticket's topic, skipping
+  Telegram-sourced comments to avoid echoes.
 - `JN-16`: assignment pings (`jira_nano.telegram.pings`) — `ping_assignee` posts a
   `@mention` (Telegram handle from the user directory, `@handle` fallback) into the
   ticket's topic on assignment.
