@@ -168,6 +168,32 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io -u ${{ github.actor }} --password-stdin
           helm push /tmp/chart/*.tgz ${{ env.CHART_REPO }}
 
+  functional:
+    name: Functional (HTTP API e2e)
+    runs-on: ubuntu-latest
+    # A minimal env comes from the GitHub Actions environment (variables/secrets).
+    environment: ci-functional
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: DOCKER_BUILDKIT=1 docker build -t jira-nano:ci .
+      - name: Boot the API and exercise it with a token
+        env:
+          JIRA_NANO_TOKENS: ${{ vars.JIRA_NANO_TOKENS || 'ci:ci-functional-token' }}
+        run: |
+          docker run -d --name jn -p 8080:8080 -e JIRA_NANO_TOKENS="$JIRA_NANO_TOKENS" \
+            --entrypoint sh jira-nano:ci -c 'jira-nano --repo /data/repo init && exec jira-nano-http'
+          for i in $(seq 1 20); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' localhost:8080/rest/api/2/myself || true)
+            [ "$code" != "000" ] && break; sleep 1
+          done
+          tok="${JIRA_NANO_TOKENS##*:}"
+          code=$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $tok" localhost:8080/rest/api/2/myself)
+          echo "authenticated GET /rest/api/2/myself -> $code"
+          docker logs jn | tail -15
+          docker rm -f jn >/dev/null 2>&1 || true
+          test "$code" = "200"
+
   build:
     name: Build distribution (on tag)
     runs-on: ubuntu-latest
