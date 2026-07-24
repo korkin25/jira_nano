@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Resolved decision `JN-D2`: implementation language is **Python** (3.11/3.12);
+  default stack (FastMCP, FastAPI, aiogram, stdlib `sqlite3`, `uv`) documented in
+  `docs/architecture.md` §8.
 - Resolved decision `JN-D1`: finalized the status/workflow model in
   `docs/status-model.md` — a Jira-conventional, fully user-configurable workflow
   with five default states (`todo` initial: `todo` → `in-progress` → `in-review`

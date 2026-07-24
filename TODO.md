@@ -9,9 +9,9 @@ place (`CLAUDE.md`, `README.md`, `docs/`, `CHANGELOG.md`, `LICENSE`,
 **DEVELOPMENT happens in a separate chat** — this session only scaffolds the
 repository.
 
-**Next action:** **pick the stack/language** (`JN-D2`, e.g. Python) and lock the
-**ticket-file schema** (`JN-D3`). The **status/workflow model** (`JN-D1`) is
-**resolved** — canonical spec in `docs/status-model.md`. Only then start Phase 1.
+**Next action:** lock the **ticket-file schema** (`JN-D3`), then start Phase 1.
+`JN-D1` (status/workflow model, `docs/status-model.md`) and `JN-D2` (stack =
+**Python**, `docs/architecture.md` §8) are both **resolved**.
 
 ## Legend
 
@@ -38,7 +38,7 @@ repository.
 | ID | Decision | Notes |
 |----|----------|-------|
 | ~~JN-D1~~ | ~~Status/workflow model~~ | **Resolved** — canonical spec in `docs/status-model.md`. |
-| JN-D2 | Stack / language | Proposed: Python (CI already assumes ruff/pytest/bandit/pip-audit). Confirm before Phase 1. |
+| ~~JN-D2~~ | ~~Stack / language~~ | **Resolved** — Python 3.11/3.12; stack in `docs/architecture.md` §8. |
 | JN-D3 | Ticket-file layout | Exact YAML frontmatter schema + body conventions for `tickets/JN-<n>.md`. `JN-D1` added fields `blocked`, `blocked_reason`, `resolution`; full schema still open. |
 | JN-D4 | MCP-vs-API priority | Which surface ships first (MCP tools vs HTTP API) given the shared service layer. |
 

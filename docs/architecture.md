@@ -171,3 +171,25 @@ server / API), so ticket management is available natively inside agent sessions.
   secrets is loaded from the environment.
 - **Derived data excluded.** The SQLite cache is `.gitignore`d and always
   rebuildable, so it is never a place secrets or authoritative state can hide.
+
+## 8. Technology stack (`JN-D2`)
+
+The implementation language is **Python** (3.11 and 3.12, matching CI). The
+language is fixed; the library picks below the first row are sensible defaults and
+may be adjusted per phase.
+
+| Concern | Choice | Notes |
+|---------|--------|-------|
+| **Language** | **Python 3.11 / 3.12** | Fixed (`JN-D2`); CI already targets both. |
+| MCP server | official `mcp` SDK (FastMCP) | Jira-shaped tool surface. |
+| HTTP API | FastAPI + uvicorn | Shares the one service layer. |
+| Telegram bot | aiogram | Bot API, webhook-driven. |
+| SQLite cache | stdlib `sqlite3` | Derived, rebuildable. |
+| Frontmatter | PyYAML / ruamel.yaml | Parse & serialize ticket YAML. |
+| Git store | `git` via subprocess (or pygit2) | One commit per change. |
+| Tooling | ruff, pytest, bandit, pip-audit | Already wired into CI. |
+| Env / distribution | `uv` for reproducible envs + `uv tool install`; single-file build (PyInstaller/shiv) evaluated later | Mitigates Python's weaker portability. |
+
+Portability was a stated priority; since Python ships no static binary by default,
+distribution leans on `uv` for reproducible installs, with a single-file build
+evaluated when packaging (`JN-25`..`JN-27`) lands.
