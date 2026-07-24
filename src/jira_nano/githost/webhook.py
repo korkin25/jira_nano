@@ -112,6 +112,6 @@ def run(repo: Path | None = None) -> None:  # pragma: no cover - server event lo
     import uvicorn
 
     root = Path(repo) if repo is not None else Path(os.environ.get("JIRA_NANO_REPO", "."))
-    host = os.environ.get("JIRA_NANO_WEBHOOK_HOST", "127.0.0.1")
+    host = os.environ.get("JIRA_NANO_WEBHOOK_HOST", "0.0.0.0")  # all interfaces; set to restrict
     port = int(os.environ.get("JIRA_NANO_WEBHOOK_PORT", "8081"))
     uvicorn.run(build_app_from_env(TicketService(root)), host=host, port=port)

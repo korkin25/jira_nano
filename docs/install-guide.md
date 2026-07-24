@@ -111,10 +111,13 @@ Configure credentials and run the server:
 ```bash
 export JIRA_NANO_TOKENS="alice:s3cret,bob:hunter2"      # username:token pairs
 export JIRA_NANO_OAUTH_CLIENTS="ci-bot:clientsecret"     # optional OAuth2 clients
-export JIRA_NANO_HTTP_HOST=127.0.0.1                     # default
+export JIRA_NANO_HTTP_HOST=0.0.0.0                       # default (all interfaces); set 127.0.0.1 to restrict
 export JIRA_NANO_HTTP_PORT=8080                          # default
 jira-nano-http
 ```
+
+> **Exposure.** The API binds all interfaces by default. Put it behind a firewall
+> or reverse proxy, or set `JIRA_NANO_HTTP_HOST=127.0.0.1` to keep it local-only.
 
 Call it like Jira (both `/rest/api/2/…` and `/rest/api/3/…`, plus `latest`):
 
@@ -165,7 +168,7 @@ comments (committed to Git).
 ```bash
 export GITLAB_WEBHOOK_SECRET="pick-a-long-random-string"
 export GITHUB_WEBHOOK_SECRET="another-random-string"
-export JIRA_NANO_WEBHOOK_HOST=0.0.0.0    # bind for external access
+export JIRA_NANO_WEBHOOK_HOST=0.0.0.0    # default (all interfaces); set 127.0.0.1 to restrict
 export JIRA_NANO_WEBHOOK_PORT=8081
 jira-nano-webhooks
 ```

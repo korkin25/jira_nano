@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- `jira-nano-http` and `jira-nano-webhooks` now bind all interfaces (`0.0.0.0`)
+  by default so they are reachable on the deploy host; set
+  `JIRA_NANO_HTTP_HOST` / `JIRA_NANO_WEBHOOK_HOST` to `127.0.0.1` to restrict.
+
 ## [0.4.0] - 2026-07-24
 
 ### Added

@@ -77,4 +77,6 @@ source = ["jira_nano"]
 #          token_type literal; real secrets always come from the environment.
 #   B608 — hits SQL built from a fixed column allow-list plus '?' placeholders
 #          (fully parameterized; no user input is interpolated into the query).
-skips = ["B105", "B608"]
+#   B104 — the HTTP API / webhook receiver are network services that bind all
+#          interfaces by design; operators restrict exposure via env var / firewall.
+skips = ["B104", "B105", "B608"]
