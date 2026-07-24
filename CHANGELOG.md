@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `JN-38`: CLI (`jira_nano.cli`, `jira-nano` console script) — `create`, `get`,
+  `list`, `search` (JQL), `transition`, `assign`, `comment`, `board` over the
+  service layer, no extra dependencies.
 - `JN-26`: skill + MCP wiring — a `jira-nano-mcp` console entry point
   (`jira_nano.mcp_server:run`, stdio), a sample client config (`examples/mcp.json`),
   and an end-to-end agent-flow test (create → transition → comment → search).

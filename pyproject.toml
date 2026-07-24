@@ -18,6 +18,7 @@ dependencies = [
 ]
 
 [project.scripts]
+jira-nano = "jira_nano.cli:main"
 jira-nano-mcp = "jira_nano.mcp_server:run"
 
 [project.optional-dependencies]
