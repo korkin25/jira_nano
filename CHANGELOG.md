@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `JN-23`: link writer (`jira_nano.githost.links.link_ticket`) — appends a
+  commit/MR/PR link to a ticket's `links[]`, idempotent on replay.
 - `JN-24`: git-host event → transition (`jira_nano.githost.apply`) — advances a
   ticket forward along the shortest legal path to the event's target status
   (`JN-D1`), auto-assigning the MR/PR author to satisfy the `in-progress` guard;
