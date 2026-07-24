@@ -56,6 +56,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `JN-6`: incremental cache upsert — a single ticket (or user) update replaces
+  its row, join rows, and FTS entry without a full walk; siblings untouched.
 - `JN-5`: full cache rebuild from `tickets/*.md` + `.jira_nano/users.yaml`
   (idempotent), plus the shared cache row writers `upsert_ticket` / `upsert_user`.
 - `JN-3`: sequential `JN-<n>` id allocator (`max + 1`, never reused).
