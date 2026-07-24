@@ -29,6 +29,7 @@ jira-nano-webhooks = "jira_nano.githost.webhook:run"
 mcp = ["mcp>=1.2"]                       # JN-11: MCP server (FastMCP)
 http = ["fastapi>=0.110", "uvicorn>=0.20"]  # JN-13: HTTP API (Jira REST)
 telegram = ["aiogram>=3.0"]              # JN-14: Telegram bot mirror
+voice = ["faster-whisper>=1.0"]         # JN-43: local Whisper STT (heavy; on-demand)
 dev = [
     "mcp>=1.2",
     "fastapi>=0.110",
@@ -70,6 +71,11 @@ markers = [
 python_version = "3.11"
 strict = true
 files = ["src", "tests"]
+
+# JN-43: optional, un-stubbed STT libraries; imported lazily inside transcribe().
+[[tool.mypy.overrides]]
+module = ["faster_whisper.*", "openai.*"]
+ignore_missing_imports = true
 
 [tool.coverage.run]
 source = ["jira_nano"]

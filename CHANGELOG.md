@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Telegram **voice-message transcription** (`telegram/voice.py`,
+  `telegram/transcribe.py`): a voice/audio reply in a ticket's forum topic is
+  transcribed and pulled back into the ticket as a comment (prefixed 🎙), then the
+  original audio message is deleted. The STT backend is pluggable — the default
+  runs a local Whisper model (`faster-whisper`, `[voice]` extra, loaded on demand)
+  and an optional cloud backend uses OpenAI (`JIRA_NANO_STT=cloud`). Heavy libs
+  are lazy-imported, so the package still imports and runs without them.
 - Telegram **static status banners**: a pre-rendered banner image per status is
   shipped as a package asset (`telegram/assets/status_<name>.png`); the mirror
   sends the matching banner as a photo with the ticket details as the caption

@@ -7,11 +7,13 @@ pull-back) is added in JN-15..JN-19.
 """
 from __future__ import annotations
 
+import asyncio
 import os
 import sys
+from io import BytesIO
 from pathlib import Path
 
-from aiogram import Bot, Dispatcher, Router
+from aiogram import Bot, Dispatcher, F, Router
 from aiogram.types import Message
 
 from jira_nano.service import TicketService
@@ -22,6 +24,8 @@ from .config import TelegramConfig
 from .mirror import mirror_since
 from .pullback import pull_back
 from .topics import BotTopicGateway
+from .transcribe import Transcriber, build_transcriber
+from .voice import transcribe_voice
 
 
 def build_bot(config: TelegramConfig) -> Bot:
@@ -29,13 +33,56 @@ def build_bot(config: TelegramConfig) -> Bot:
     return Bot(token=config.token)
 
 
-def build_dispatcher(service: TicketService) -> Dispatcher:
-    """Create the Dispatcher with the mirror router and in-process service access."""
+def build_dispatcher(
+    service: TicketService, transcriber: Transcriber | None = None
+) -> Dispatcher:
+    """Create the Dispatcher with the mirror router and in-process service access.
+
+    ``transcriber`` is the speech-to-text backend for voice pull-back (JN-43). It
+    may be ``None``: the backend is then built lazily on the first voice message
+    (so the heavy STT libraries are only touched when actually needed).
+    """
     dispatcher = Dispatcher()
     directory = UserDirectory.load(service.paths.config_dir)
     dispatcher["service"] = service
     dispatcher["directory"] = directory
+    dispatcher["transcriber"] = transcriber
     router = Router(name="jira_nano")
+
+    # JN-43: register the voice handler BEFORE the generic pull-back handler so it
+    # wins for voice messages (the generic handler no-ops on them anyway, as
+    # ``message.text`` is None, but ordering keeps the intent explicit).
+    @router.message(F.voice)
+    async def on_voice(message: Message) -> None:  # pragma: no cover - needs live Telegram
+        # JN-43: transcribe a voice message and pull it back as a ticket comment.
+        if (
+            message.message_thread_id is None
+            or message.from_user is None
+            or message.bot is None
+            or message.voice is None
+        ):
+            return
+        active = dispatcher["transcriber"]
+        if active is None:
+            active = build_transcriber()
+            dispatcher["transcriber"] = active
+        buf = BytesIO()
+        await message.bot.download(message.voice, destination=buf)
+        audio = buf.getvalue()
+        username = message.from_user.username or str(message.from_user.id)
+        # The STT step is CPU-heavy and synchronous: run it off the event loop.
+        ticket_id = await asyncio.to_thread(
+            transcribe_voice,
+            service,
+            directory,
+            active,
+            audio,
+            message.voice.mime_type,
+            message.message_thread_id,
+            username,
+        )
+        if ticket_id is not None:
+            await message.delete()
 
     @router.message()
     async def on_message(message: Message) -> None:
