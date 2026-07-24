@@ -13,8 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `docs/status-model.md` — a Jira-conventional, fully user-configurable workflow
   with five default states (`todo` initial: `todo` → `in-progress` → `in-review`
   → `done`, plus `archived`), strictly enforced with no illegal transitions and
-  no force override, forward-only auto-advance on git-host events, a single
-  `assignee` guard on `in-progress`, and per-repository workflow config.
+  no force override, an orthogonal `blocked` impediment flag (Jira-style),
+  forward-only auto-advance on git-host events, a single `assignee` guard on
+  `in-progress`, and per-repository workflow config.
 
 ### Added
 

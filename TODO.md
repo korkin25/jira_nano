@@ -39,7 +39,7 @@ repository.
 |----|----------|-------|
 | ~~JN-D1~~ | ~~Status/workflow model~~ | **Resolved** — canonical spec in `docs/status-model.md`. |
 | JN-D2 | Stack / language | Proposed: Python (CI already assumes ruff/pytest/bandit/pip-audit). Confirm before Phase 1. |
-| JN-D3 | Ticket-file layout | Exact YAML frontmatter schema + body conventions for `tickets/JN-<n>.md`. `JN-D1` added field `resolution` (on `archived`); full schema still open. |
+| JN-D3 | Ticket-file layout | Exact YAML frontmatter schema + body conventions for `tickets/JN-<n>.md`. `JN-D1` added fields `blocked`, `blocked_reason`, `resolution`; full schema still open. |
 | JN-D4 | MCP-vs-API priority | Which surface ships first (MCP tools vs HTTP API) given the shared service layer. |
 
 ## Phase 1 — Core (git ticket store + sqlite cache + CRUD + search)

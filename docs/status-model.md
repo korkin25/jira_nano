@@ -10,7 +10,7 @@
 - **Fully user-configurable.** States, transitions, guards, git-host event
   mappings, and icons/colors are all defined in a config file. The set below is
   only the built-in **default** — a user may replace it entirely (e.g. add a
-  `blocked` or `qa` state).
+  `qa` or `staged` state).
 - **Strictly enforced.** Once configured, the workflow is a strict state machine.
   Only transitions declared in the config are legal; any other transition is
   rejected. **There is no force/override bypass** — the configured state machine
@@ -44,7 +44,22 @@ archived    → todo        (revive)
 - Any non-terminal state may move to `archived`.
 - Terminal states are **reopenable** via the explicit transitions above:
   `done → todo` (reopen) and `archived → todo` (revive). Git history records the
-  reopen; no separate flag is needed.
+  reopen.
+
+## Blocked flag (impediment)
+
+Following Jira's impediment flag, **blocked** is an **orthogonal flag, not a
+workflow state**: a ticket can be blocked while `in-progress` or `in-review`, and
+unblocking must not lose its pipeline position. It is carried in frontmatter:
+
+```yaml
+blocked: true
+blocked_reason: "waiting on JN-42"   # optional
+```
+
+`status` always reflects true pipeline position; `blocked` is a separate axis. It
+does not gate transitions by default and is rendered as a 🚫 overlay on the topic
+title/posts in Telegram.
 
 ## Terminal semantics: `done` vs `archived`
 
@@ -105,7 +120,7 @@ GitLab/GitHub):
   ticket-store repo — versioned like everything else, so the workflow definition
   is itself part of the audit trail. One workflow per repository/project.
 - A user may redefine the full set of states (including adding states such as
-  `blocked` or `qa`), transitions, guards, event mappings, and icons/colors.
+  `qa` or `staged`), transitions, guards, event mappings, and icons/colors.
 
 ### Config shape
 
@@ -147,12 +162,13 @@ else is permitted.
   available, no special stickers required.
 - **State icon** (emoji) is rendered as a prefix in the topic title and in update
   posts.
+- **`blocked`** adds a 🚫 overlay to the topic title/posts.
 - Note: arbitrary emoji as a *native topic icon* is **not** reliably available
   (the Bot API limits topic icons to `getForumTopicIconStickers`), so color +
   in-text emoji is the mechanism rather than custom native icons.
 
 ## Impact on the ticket schema (`JN-D3`)
 
-This decision introduces one frontmatter field consumed by the workflow —
-`resolution` (enum, set on `archived`). The full frontmatter schema remains open
-under `JN-D3`.
+This decision introduces three frontmatter fields consumed by the workflow —
+`blocked` (bool), `blocked_reason` (string, optional), and `resolution` (enum, set
+on `archived`). The full frontmatter schema remains open under `JN-D3`.
