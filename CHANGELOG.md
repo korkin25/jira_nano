@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `JN-20`: `JN-<n>` id parser (`jira_nano.githost.parser.find_ids`) — extracts
+  ticket refs from commit messages / MR / PR titles / branches, deduped and
+  order-preserving, with no false positives.
 - `JN-19`: comment pull-back (`jira_nano.telegram.pullback`) — a human topic
   message is written back into the ticket as a comment (`source=telegram`, author
   resolved from the directory); wired into the bot's message handler.
