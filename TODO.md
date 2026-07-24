@@ -25,9 +25,9 @@ runtime add-on.
 `JN-16`, `JN-18`, `JN-19` (skeleton, topics, change-feed, icons, pings, update
 posts, comment pull-back).
 
-**Phase 4 in progress:** `JN-20` (parser), `JN-24` (event→transition), `JN-23`
-(link writer), `JN-36` (receiver), `JN-21` (GitLab), `JN-22` (GitHub) done.
-**Next: `JN-37` (last Phase 4).**
+**Phase 4 (Git-host GitLab/GitHub) is COMPLETE** — `JN-20`, `JN-24`, `JN-23`,
+`JN-36`, `JN-21`, `JN-22`, `JN-37` (parser, event→transition, link writer, webhook
+receiver, GitLab, GitHub, polling). **Next: Phase 5 (`JN-25`, skill packaging).**
 
 **All planning decisions are resolved:**
 
@@ -38,7 +38,7 @@ posts, comment pull-back).
 - `JN-D5` — HTTP API = drop-in **Jira REST** (v2 + v3) → `docs/http-api.md`
 - `JN-D6` — MCP tool surface (copies Jira MCP servers) → `docs/mcp-tools.md`
 
-**Next action:** implement **`JN-37`** (polling fallback) — completes Phase 4.
+**Next action:** start **Phase 5** — author **`JN-25`** (`SKILL.md`), TDD.
 
 ## Legend
 
@@ -73,18 +73,6 @@ posts, comment pull-back).
 | ID | Status | Task | Details |
 |----|--------|------|---------|
 | JN-34 | ⬜ | MCP streamable-HTTP transport | Deferred add-on: expose the MCP server (`JN-11`) over remote streamable-HTTP in addition to stdio. |
-
-## Phase 4 — Git-host integration (GitLab / GitHub)
-
-> **Remaining:** `JN-37`. (`JN-20`, `JN-24`, `JN-23`, `JN-36`, `JN-21`, `JN-22` ✅ done.)
-> A shared webhook receiver (`JN-36`) normalizes GitLab/GitHub payloads into one
-> event model, so the host adapters stay thin and symmetric; polling (`JN-37`) is
-> the fallback where webhooks are unavailable. The receiver is separate from the
-> Jira REST API (`JN-D4`).
-
-| ID | Status | Task | Details |
-|----|--------|------|---------|
-| JN-37 | ⬜ | Polling fallback | Poll host APIs for MRs/commits where webhooks are unavailable; same pipeline. |
 
 ## Phase 5 — Skill packaging
 

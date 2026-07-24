@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `JN-37`: polling fallback (`jira_nano.githost.polling.poll_once`) — for hosts
+  without webhooks, fetches + parses + dispatches events through the same
+  pipeline, deduped by a `seen` set. **Phase 4 (Git-host) complete.**
 - `JN-22`: GitHub integration (`jira_nano.githost.github.parse_github`) —
   symmetric to GitLab: normalizes pull-request (opened / merged / closed) and push
   payloads into `GitHostEvent`.
