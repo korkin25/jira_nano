@@ -46,6 +46,14 @@ This project is developed by an AI agent under continuous, autonomous iteration.
 - Auto-logging: started/ongoing work goes to TODO.md (Current state + phase tables); completed and verified work moves to CHANGELOG.md, in the same change. Never mark a task done without a passing test.
 - Cold-start: keep the top of TODO.md a "Current state / next action" block so a fresh session knows exactly what to do next.
 
+### Per-task lifecycle (MANDATORY — in this order)
+
+1. **Log first.** The task must already exist in `TODO.md` as `JN-<n>` *before* any work begins. If it is not logged, log it first.
+2. **Branch.** Create `feature/JN-<n>-<slug>` off `main`.
+3. **TDD.** Write the failing test(s), then implement until green; commit in small logical units on the branch and push after each.
+4. **Record.** When the task is done and the full suite is green, move the item from `TODO.md` to `CHANGELOG.md` and commit.
+5. **Merge.** Merge the branch into `main` with `--no-ff` (only when green), then push `main`.
+
 ## Conventions
 
 - **Git is the source of record.** Ticket files under `tickets/` are the

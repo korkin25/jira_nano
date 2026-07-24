@@ -36,6 +36,21 @@ receiver, GitLab, GitHub, polling).
 including the previously-deferred `JN-34` (remote MCP over streamable-HTTP), is
 implemented, TDD, and merged. Nothing deferred.
 
+**Phase 6 (post-1.0 Telegram polish + live testing):**
+
+- `JN-39` — Telegram message design overhaul (monospace id, bright circle status
+  palette, `<blockquote>` ticket/board views) — **done**, merged.
+- `JN-40` — Telegram **auto-trigger**: change-feed → mirror on a background poller
+  (`telegram/mirror.py`; `jira-nano-bot` posts automatically on ticket changes) —
+  **done**, merged.
+- `JN-41` — Static per-status **banners** sent as photo + caption, shipped as
+  package assets, no runtime rendering (`telegram/banners.py`) — **done**, merged.
+- `JN-42` — Automated **live** end-to-end tests (mirror + auto-trigger + banners),
+  opt-in via `JIRA_NANO_LIVE=1` — **done**, merged.
+- `JN-43` — **Voice-message transcription**: voice reply in a topic → transcribe
+  via a pluggable STT backend → pull the text into the ticket as a comment →
+  delete the original audio — **pending** (needs an STT-backend decision).
+
 **All planning decisions are resolved:**
 
 - `JN-D1` — status/workflow model → `docs/status-model.md`
