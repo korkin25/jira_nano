@@ -44,7 +44,7 @@ email. `jira_nano` inverts that:
 ## Features
 
 Highlights below; the full numbered list is in
-[`docs/features.md`](docs/features.md).
+[`Features.md`](Features.md).
 
 - Git-backed ticket store: one Markdown file per ticket with YAML frontmatter.
 - Rebuildable SQLite cache for fast search, filters, and boards.

@@ -20,8 +20,8 @@ the ticket files); an **MCP server + HTTP API** whose tool shape is deliberately
 close to common Jira MCP servers so existing AI workflows are drop-in; and
 **Git-host integration** that links commits and MRs/PRs to tickets across both
 GitLab and GitHub. It is also shipped as an **Agent Skill** (`SKILL.md`) so
-agents can manage tickets natively. The project is currently in the **planning**
-stage — see `TODO.md` for the next action.
+agents can manage tickets natively. Status: **released** — versions live in
+`CHANGELOG.md`, open work in `TODO.md`, the feature backlog in `Features.md`.
 
 ## Language rules (STRICT)
 
@@ -31,6 +31,74 @@ stage — see `TODO.md` for the next action.
 - **Conversation with the user is always Russian** — reply in Russian regardless of
   the language they wrote in. This applies only to the live chat, never to anything
   written into the repo.
+
+## Feature backlog — `Features.md` (root)
+
+- Everything the user asks to build, and every "add for brainstorm" idea, is a
+  **numbered** entry in `Features.md` at the repository **root** (never under
+  `docs/`). If a features doc lives under `docs/`, move it to the root.
+- Numbers are **stable and never reused**. Entries are grouped by state:
+  **Current** (in progress) · **Planned** · **Brainstorm** (ideas) · **Delivered**.
+- A new idea from the user lands here first (as Brainstorm or Planned) before it
+  becomes a task in `TODO.md`.
+
+## Documentation sync (apply without being asked)
+
+Keep docs in lockstep with the code, **in the same change** — never wait to be asked:
+
+| What changed | Update |
+|---|---|
+| New/changed feature or behavior | `Features.md` (root) entry + `README.md` |
+| CLI / API / MCP surface (commands, flags, tools) | `README.md` + relevant `docs/*.md` |
+| Architecture, storage schema, data flow, security model | `docs/architecture.md` |
+| A feature is picked up for implementation | its test section in `docs/tests.md` |
+| Any user-visible change | `CHANGELOG.md` under `## [Unreleased]` |
+| Task started / finished / blocked, or a test's pass status | `TODO.md` |
+| User asks to build something, or "add for brainstorm" | numbered entry in `Features.md` |
+
+- `CHANGELOG.md` follows [Keep a Changelog](https://keepachangelog.com/) + SemVer.
+- `TODO.md` holds only open/in-progress work and the per-test pass status of the
+  current feature; a done+verified task moves to `CHANGELOG.md` in the same change.
+- Never mark a task done without proof it works — see **Testing policy**.
+
+## Testing policy (apply without being asked)
+
+**Three test groups:**
+
+- **(a) Fully automated** — unit/integration tests plus all debugging. Run in
+  GitHub Actions CI on every push/PR. Claude **must read and analyze the CI run
+  logs** (`gh run view --log`) for every run — **even when the job is green**.
+- **(b) Dev-machine / AI-sandbox** — tests runnable only on a developer machine or
+  against external services (live Telegram bot, GitLab/GitHub webhooks, the MCP /
+  HTTP server end-to-end) or not fully automatable, run in an **isolated sandbox
+  under Claude's control** — opt-in via `JIRA_NANO_LIVE=1`. Claude runs these
+  itself during development, and again after a release once full CI is green.
+- **(c) Human-in-the-loop** — require a human. Claude writes a **methodology** and
+  proposes it to the user to run.
+
+**TDD & flow:**
+
+- For every feature/bug write the automated tests **FIRST** (they must fail), then
+  implement until green. No feature code without a test.
+- A task is **done only when 100% of its features are tested** — every applicable
+  group covered, group-(c) methodology proposed.
+- **Do not start a new feature until the current one is fully tested.**
+
+**Artifacts & structure:**
+
+- When a feature is picked up, immediately add a section to `docs/tests.md` listing
+  its concrete tests, each tagged `(a)`/`(b)`/`(c)`.
+- All test scripts, scenarios, and methodologies (**every group**) live structured
+  under `auto-tests/`. Group-(a) is wired into CI to run automatically. Every
+  scenario/methodology is also **used during development**, not only in CI.
+- `TODO.md` tracks the pass/fail status of each test of the current feature.
+
+**Release gate:**
+
+- Group-(a) must be **green in CI** to release. If CI fails → **no release**; keep
+  fixing until CI is green.
+- After a release (full CI green) Claude re-runs group-(b); any remaining group-(c)
+  tests → methodology handed to the user.
 
 ## Development workflow (autonomous — apply without being asked)
 
@@ -48,11 +116,14 @@ This project is developed by an AI agent under continuous, autonomous iteration.
 
 ### Per-task lifecycle (MANDATORY — in this order)
 
-1. **Log first.** The task must already exist in `TODO.md` as `JN-<n>` *before* any work begins. If it is not logged, log it first.
-2. **Branch.** Create `feature/JN-<n>-<slug>` off `main`.
-3. **TDD.** Write the failing test(s), then implement until green; commit in small logical units on the branch and push after each.
-4. **Record.** When the task is done and the full suite is green, move the item from `TODO.md` to `CHANGELOG.md` and commit.
-5. **Merge.** Merge the branch into `main` with `--no-ff` (only when green), then push `main`.
+1. **Log first.** The task exists in `TODO.md` as `JN-<n>` before any work begins. If it is not logged, log it first.
+2. **Backlog.** Ensure the feature is a numbered entry in root `Features.md`.
+3. **Test plan.** Add the feature's section to `docs/tests.md` (groups a/b/c).
+4. **Branch.** Create `feature/JN-<n>-<slug>` off `main`.
+5. **TDD.** Write the failing group-(a) test(s) first; implement until green; commit in small logical units on the branch and push after each.
+6. **Verify.** Group-(a) green in CI (analyze the run logs even when green); run group-(b) in dev/sandbox (`JIRA_NANO_LIVE=1`); update each test's status in `TODO.md`.
+7. **Record.** When done and the full suite is green, move the item from `TODO.md` to `CHANGELOG.md`.
+8. **MR.** Open an MR/PR to `main`; merge with `--no-ff` only when CI is green, then push `main`.
 
 ## Conventions
 
