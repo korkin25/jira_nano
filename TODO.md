@@ -29,8 +29,12 @@ posts, comment pull-back).
 `JN-36`, `JN-21`, `JN-22`, `JN-37` (parser, event→transition, link writer, webhook
 receiver, GitLab, GitHub, polling).
 
-**Phase 5 in progress:** `JN-25` (`SKILL.md`), `JN-26` (skill + MCP wiring),
-`JN-38` (CLI) done. **Next: `JN-27` (final task).**
+**Phase 5 (Skill packaging) is COMPLETE** — `JN-25`, `JN-26`, `JN-38`, `JN-27`
+(SKILL.md, skill+MCP wiring, CLI, packaging).
+
+🏁 **ALL FIVE PHASES COMPLETE** — every planned task (`JN-1`…`JN-38`, `JN-D1`…
+`JN-D6`) is implemented, TDD, and merged. `JN-34` (remote MCP transport) remains a
+deferred runtime add-on.
 
 **All planning decisions are resolved:**
 
@@ -41,7 +45,8 @@ receiver, GitLab, GitHub, polling).
 - `JN-D5` — HTTP API = drop-in **Jira REST** (v2 + v3) → `docs/http-api.md`
 - `JN-D6` — MCP tool surface (copies Jira MCP servers) → `docs/mcp-tools.md`
 
-**Next action:** implement **`JN-27`** (packaging/distribution) — the final task.
+**Next action:** none — feature-complete. Optional: `JN-34` (remote MCP transport)
+and PyPI publish (a separate explicit step).
 
 ## Legend
 
@@ -77,10 +82,3 @@ receiver, GitLab, GitHub, polling).
 |----|--------|------|---------|
 | JN-34 | ⬜ | MCP streamable-HTTP transport | Deferred add-on: expose the MCP server (`JN-11`) over remote streamable-HTTP in addition to stdio. |
 
-## Phase 5 — Skill packaging
-
-> **Remaining:** `JN-27`. (`JN-25`, `JN-26`, `JN-38` ✅ done.)
-
-| ID | Status | Task | Details |
-|----|--------|------|---------|
-| JN-27 | ⬜ | Packaging/distribution | Installable bundle (skill + MCP entrypoint) via `uv tool`/pipx; single-file build eval (`JN-D2`); publish steps. |

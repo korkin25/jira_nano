@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `JN-27`: packaging & distribution — `jira-nano` / `jira-nano-mcp` console scripts,
+  optional extras (`mcp`/`http`/`telegram`), `docs/packaging.md` (install via
+  `uv tool`/`pipx`, build, publish). **Phase 5 (Skill packaging) complete — all
+  five phases done.**
 - `JN-38`: CLI (`jira_nano.cli`, `jira-nano` console script) — `create`, `get`,
   `list`, `search` (JQL), `transition`, `assign`, `comment`, `board` over the
   service layer, no extra dependencies.
