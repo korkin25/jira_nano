@@ -1,8 +1,8 @@
 """SQLite cache schema (JN-4).
 
-Full-ticket rows (frontmatter + body + comments) so all reads are served from the
-cache, plus join tables and an FTS index for text search. A ``meta`` table holds
-the schema version and the last-synced commit sha (used by JN-29).
+Full-ticket rows (frontmatter columns + a ``ticket_json`` blob) so all reads are
+served from the cache, plus join tables and an FTS index for text search. A
+``meta`` table holds the schema version and the last-synced commit sha (JN-29).
 """
 from __future__ import annotations
 
@@ -10,22 +10,82 @@ import sqlite3
 
 SCHEMA_VERSION = 1
 
-# TODO(JN-4): DDL for
-#   tickets(id PK, type, title, status, priority, assignee, reporter, blocked,
-#           blocked_reason, resolution, parent, created, updated, body, comments_json)
-#   ticket_labels(ticket_id, label)
-#   ticket_watchers(ticket_id, handle)
-#   ticket_links(ticket_id, type, host, url, ref)
-#   users(handle PK, name, telegram, gitlab, github, email, account_id)
-#   tickets_fts (FTS5 over title + body + comments)
-#   meta(schema_version, head_sha)
+_DDL = """
+CREATE TABLE IF NOT EXISTS meta (
+    key   TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS tickets (
+    id             TEXT PRIMARY KEY,
+    type           TEXT NOT NULL,
+    title          TEXT NOT NULL,
+    status         TEXT NOT NULL,
+    priority       TEXT NOT NULL,
+    assignee       TEXT,
+    reporter       TEXT NOT NULL,
+    blocked        INTEGER NOT NULL,
+    blocked_reason TEXT,
+    resolution     TEXT,
+    parent         TEXT,
+    created        TEXT NOT NULL,
+    updated        TEXT NOT NULL,
+    ticket_json    TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_tickets_status   ON tickets(status);
+CREATE INDEX IF NOT EXISTS idx_tickets_assignee ON tickets(assignee);
+CREATE INDEX IF NOT EXISTS idx_tickets_priority ON tickets(priority);
+CREATE INDEX IF NOT EXISTS idx_tickets_type     ON tickets(type);
+CREATE INDEX IF NOT EXISTS idx_tickets_parent   ON tickets(parent);
+CREATE TABLE IF NOT EXISTS ticket_labels (
+    ticket_id TEXT NOT NULL,
+    label     TEXT NOT NULL,
+    PRIMARY KEY (ticket_id, label)
+);
+CREATE TABLE IF NOT EXISTS ticket_watchers (
+    ticket_id TEXT NOT NULL,
+    handle    TEXT NOT NULL,
+    PRIMARY KEY (ticket_id, handle)
+);
+CREATE TABLE IF NOT EXISTS ticket_links (
+    ticket_id TEXT NOT NULL,
+    type      TEXT NOT NULL,
+    host      TEXT,
+    url       TEXT NOT NULL,
+    ref       TEXT
+);
+CREATE TABLE IF NOT EXISTS users (
+    handle     TEXT PRIMARY KEY,
+    name       TEXT,
+    telegram   TEXT,
+    gitlab     TEXT,
+    github     TEXT,
+    email      TEXT,
+    account_id TEXT
+);
+CREATE VIRTUAL TABLE IF NOT EXISTS tickets_fts USING fts5 (
+    ticket_id UNINDEXED,
+    title,
+    description,
+    comments
+);
+"""
 
 
 def create_schema(conn: sqlite3.Connection) -> None:
-    """Create all tables/indexes/FTS and stamp the schema version. TODO(JN-4)."""
-    raise NotImplementedError
+    """Create all tables/indexes/FTS and stamp the schema version. Idempotent."""
+    conn.executescript(_DDL)
+    conn.execute(
+        "INSERT INTO meta(key, value) VALUES('schema_version', ?) "
+        "ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+        (str(SCHEMA_VERSION),),
+    )
+    conn.commit()
 
 
 def read_version(conn: sqlite3.Connection) -> int | None:
-    """Return the stored schema version, or ``None`` if uninitialized. TODO(JN-4)."""
-    raise NotImplementedError
+    """Return the stored schema version, or ``None`` if uninitialized."""
+    try:
+        row = conn.execute("SELECT value FROM meta WHERE key = 'schema_version'").fetchone()
+    except sqlite3.OperationalError:
+        return None
+    return int(row[0]) if row else None

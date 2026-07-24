@@ -56,6 +56,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `JN-4`: SQLite cache schema — full-ticket rows, join tables
+  (`labels`/`watchers`/`links`), `users`, an FTS5 index, and a `meta` table with
+  the schema version; `create_schema` (idempotent) + `read_version`.
 - `JN-28`: config & user-directory loader — repo paths, `.jira_nano/workflow.yaml`
   (with a built-in default per `JN-D1`), and `.jira_nano/users.yaml` with handle
   resolution.
