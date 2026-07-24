@@ -25,7 +25,8 @@ runtime add-on.
 `JN-16`, `JN-18`, `JN-19` (skeleton, topics, change-feed, icons, pings, update
 posts, comment pull-back).
 
-**Phase 4 started:** `JN-20` (`JN-<n>` parser) done. **Next: `JN-24`.**
+**Phase 4 in progress:** `JN-20` (parser), `JN-24` (event→transition) done.
+**Next: `JN-23`.**
 
 **All planning decisions are resolved:**
 
@@ -36,7 +37,7 @@ posts, comment pull-back).
 - `JN-D5` — HTTP API = drop-in **Jira REST** (v2 + v3) → `docs/http-api.md`
 - `JN-D6` — MCP tool surface (copies Jira MCP servers) → `docs/mcp-tools.md`
 
-**Next action:** implement **`JN-24`** (event → transition map), TDD.
+**Next action:** implement **`JN-23`** (link writer), TDD.
 
 ## Legend
 
@@ -74,7 +75,7 @@ posts, comment pull-back).
 
 ## Phase 4 — Git-host integration (GitLab / GitHub)
 
-> **Order:** `JN-24` → `JN-23` → `JN-36` → `JN-21` → `JN-22` → `JN-37`. (`JN-20` ✅ done.)
+> **Order:** `JN-23` → `JN-36` → `JN-21` → `JN-22` → `JN-37`. (`JN-20`, `JN-24` ✅ done.)
 > A shared webhook receiver (`JN-36`) normalizes GitLab/GitHub payloads into one
 > event model, so the host adapters stay thin and symmetric; polling (`JN-37`) is
 > the fallback where webhooks are unavailable. The receiver is separate from the
@@ -82,7 +83,6 @@ posts, comment pull-back).
 
 | ID | Status | Task | Details |
 |----|--------|------|---------|
-| JN-24 | ⬜ | Event → transition map | Config map (`JN-D1`): forward auto-advance along the legal path; guard auto-assigns the MR/PR author; skip+note if unreachable. |
 | JN-23 | ⬜ | Link writer | Append commit/MR/PR to `links[]` via the service; idempotent (no dupes). |
 | JN-36 | ⬜ | Webhook receiver + event model | HTTP listener `/webhooks/{gitlab,github}` (separate from the Jira REST API, `JN-D4`); verify signature; normalize into `{host,kind,ref,url,ids,author}`. |
 | JN-21 | ⬜ | GitLab integration | Map GitLab push/MR payloads → the common event; drive `JN-23`+`JN-24`. |

@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `JN-24`: git-host event → transition (`jira_nano.githost.apply`) — advances a
+  ticket forward along the shortest legal path to the event's target status
+  (`JN-D1`), auto-assigning the MR/PR author to satisfy the `in-progress` guard;
+  skips + notes if unreachable.
 - `JN-20`: `JN-<n>` id parser (`jira_nano.githost.parser.find_ids`) — extracts
   ticket refs from commit messages / MR / PR titles / branches, deduped and
   order-preserving, with no false positives.
