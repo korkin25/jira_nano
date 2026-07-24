@@ -101,7 +101,7 @@ A list of objects; git-host integration (`JN-D1`, Phase 4) appends to it.
 
 | Key | Type | Required | Notes |
 |-----|------|----------|-------|
-| `type` | `commit` \| `mr` \| `pr` \| `branch` \| `issue` | yes | Kind of link. |
+| `type` | `commit` \| `mr` \| `pr` \| `branch` \| `issue` \| `telegram` | yes | Kind of link. `telegram` stores the ticket's forum-topic mapping (`ref` = topic id). |
 | `host` | `gitlab` \| `github` | yes | Origin host. |
 | `url` | string | yes | Canonical URL. |
 | `ref` | string | no | Short handle: `abc1234`, `!42`, `#42`. |

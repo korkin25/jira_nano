@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Refined the Phase 3–5 plans: added a git change-feed for outbound Telegram
+  mirroring (`JN-35`), a shared git-host webhook receiver (`JN-36`) + polling
+  fallback (`JN-37`), and a CLI (`JN-38`); the Telegram ticket↔topic mapping is a
+  `links[]` entry (new `telegram` link type).
 - Refined the Phase 2 plan: split out shared/support modules — Jira field mapper
   (`JN-33`), JQL subset parser (`JN-30`), Markdown↔ADF converter (`JN-31`), and
   HTTP auth (`JN-32`) — kept the MCP-before-HTTP order, and added a deferred

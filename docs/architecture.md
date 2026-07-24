@@ -119,8 +119,12 @@ Intended flow:
    Git store stays the single source of record.
 
 Topic/thread management (create a forum topic per ticket or per epic, route
-messages to the right thread) is handled by the bot. See §7 for why a bot rather
-than a userbot.
+messages to the right thread) is handled by the bot; the ticket↔topic mapping is
+stored as a `links[]` entry on the ticket. **Outbound posts are driven by a git
+change-feed** — the bot reacts to committed ticket changes (not only local
+mutations), so it mirrors updates from every source (MCP, HTTP, CLI, or `git
+pull`). Like every internal component it calls the service layer **in-process**
+(`JN-D4`), never via the HTTP API. See §7 for why a bot rather than a userbot.
 
 ## 4. MCP + API surface
 
@@ -168,8 +172,10 @@ Links code to tickets across **both GitLab and GitHub**.
   commit / MR / PR.
 - **Status moves:** on events (e.g. MR opened → `in-review`, merged → `done`),
   advance the ticket through the configured workflow.
-- **Delivery:** driven by **webhooks** where available, with **polling** as a
-  fallback for restricted environments. Both hosts are supported symmetrically.
+- **Delivery:** a shared **webhook receiver** (separate from the public HTTP API,
+  `JN-D4`) verifies signatures and normalizes GitLab/GitHub payloads into one
+  event model, so the host adapters stay thin and symmetric; **polling** is the
+  fallback where webhooks are unavailable.
 
 ## 6. Skill packaging
 

@@ -90,29 +90,47 @@ repository.
 
 ## Phase 3 — Telegram bot mirror
 
+> **Order:** `JN-14` → `JN-15` → `JN-35` → `JN-17` → `JN-16` → `JN-18` → `JN-19`.
+> The bot is an internal component — it calls the service layer **in-process**
+> (`JN-D4`) and reacts to committed ticket changes via the git change-feed
+> (`JN-35`), so it mirrors changes from every source (MCP/HTTP/CLI/git pull). The
+> ticket↔topic mapping is stored as a `links[]` entry on the ticket.
+
 | ID | Status | Task | Details |
 |----|--------|------|---------|
-| JN-14 | ⬜ | Bot skeleton | Telegram **Bot API** app (webhooks); token from env. |
-| JN-15 | ⬜ | Forum topics/threads | Create/manage a thread per ticket (or epic). |
-| JN-16 | ⬜ | Assignment pings | `@mention` the assignee on assignment. |
-| JN-17 | ⬜ | Status icons | Reflect ticket status via topic/message icons. |
-| JN-18 | ⬜ | Update posts | Post ticket updates into the ticket thread. |
-| JN-19 | ⬜ | Comment pull-back | Write Telegram comments back into ticket files + commit. |
+| JN-14 | ⬜ | Bot skeleton | aiogram Bot API app (webhooks; token from env; forum supergroup from config); in-process service access (`JN-D4`). |
+| JN-15 | ⬜ | Forum topic management | One topic per ticket (and epic); persist the ticket↔topic mapping as a `links[]` entry; reuse existing. |
+| JN-35 | ⬜ | Git change-feed | Derive semantic per-ticket events (status/assignee/blocked/comment/link diffs) from committed changes (on `JN-29`); consumed by the mirror. |
+| JN-17 | ⬜ | Status icons/colors | Map status→topic color + title emoji (`JN-D1`); 🚫 on `blocked`; `editForumTopic` on change. |
+| JN-16 | ⬜ | Assignment pings | `@mention` the assignee (Telegram handle via `users.yaml`) in the ticket topic on assign. |
+| JN-18 | ⬜ | Update posts | Post change deltas (transition/edit/new link) from the feed into the ticket topic. |
+| JN-19 | ⬜ | Comment pull-back | Human topic message → `comment` via the service (commit-first→cache), `source=telegram`, author via `users.yaml`. |
 
 ## Phase 4 — Git-host integration (GitLab / GitHub)
 
+> **Order:** `JN-20` → `JN-24` → `JN-23` → `JN-36` → `JN-21` → `JN-22` → `JN-37`.
+> A shared webhook receiver (`JN-36`) normalizes GitLab/GitHub payloads into one
+> event model, so the host adapters stay thin and symmetric; polling (`JN-37`) is
+> the fallback where webhooks are unavailable. The receiver is separate from the
+> Jira REST API (`JN-D4`).
+
 | ID | Status | Task | Details |
 |----|--------|------|---------|
-| JN-20 | ⬜ | `JN-<n>` parser | Detect ids in commit messages and MR/PR titles. |
-| JN-21 | ⬜ | GitLab integration | Webhook/poll → link + transition. |
-| JN-22 | ⬜ | GitHub integration | Webhook/poll → link + transition, symmetric to GitLab. |
-| JN-23 | ⬜ | Link writer | Add commit/MR/PR entries to ticket `links`. |
-| JN-24 | ⬜ | Event → transition map | Map host events onto workflow transitions. |
+| JN-20 | ⬜ | `JN-<n>` parser | Detect ids in commit messages, MR/PR titles (opt. branches); no false positives. |
+| JN-24 | ⬜ | Event → transition map | Config map (`JN-D1`): forward auto-advance along the legal path; guard auto-assigns the MR/PR author; skip+note if unreachable. |
+| JN-23 | ⬜ | Link writer | Append commit/MR/PR to `links[]` via the service; idempotent (no dupes). |
+| JN-36 | ⬜ | Webhook receiver + event model | HTTP listener `/webhooks/{gitlab,github}` (separate from the Jira REST API, `JN-D4`); verify signature; normalize into `{host,kind,ref,url,ids,author}`. |
+| JN-21 | ⬜ | GitLab integration | Map GitLab push/MR payloads → the common event; drive `JN-23`+`JN-24`. |
+| JN-22 | ⬜ | GitHub integration | Symmetric: GitHub push/PR payloads → the common event; same pipeline. |
+| JN-37 | ⬜ | Polling fallback | Poll host APIs for MRs/commits where webhooks are unavailable; same pipeline. |
 
 ## Phase 5 — Skill packaging
 
+> **Order:** `JN-25` → `JN-26` → `JN-38` → `JN-27`.
+
 | ID | Status | Task | Details |
 |----|--------|------|---------|
-| JN-25 | ⬜ | `SKILL.md` | Agent Skill targeting the agentskills.io standard. |
-| JN-26 | ⬜ | Skill + MCP wiring | Let agents drive the tracker via skill + MCP. |
-| JN-27 | ⬜ | Packaging/distribution | Package the skill for OpenClaw / Claude / others. |
+| JN-25 | ⬜ | `SKILL.md` | agentskills.io format: how to drive jira_nano via MCP/CLI; when-to-use triggers. |
+| JN-26 | ⬜ | Skill + MCP wiring | Skill instructs agents to use the MCP server; example flows; bundle MCP config. |
+| JN-38 | ⬜ | CLI | Thin CLI over the service layer for humans/scripts (used by the skill and packaging). |
+| JN-27 | ⬜ | Packaging/distribution | Installable bundle (skill + MCP entrypoint) via `uv tool`/pipx; single-file build eval (`JN-D2`); publish steps. |
