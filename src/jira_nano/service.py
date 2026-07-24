@@ -20,7 +20,7 @@ from .cache.upsert import upsert_ticket
 from .config import Paths, load_workflow
 from .errors import TicketNotFoundError
 from .ids import allocate
-from .models import Status, Ticket
+from .models import Comment, Host, Link, LinkType, Status, Ticket
 from .store import GitTicketStore
 
 
@@ -65,16 +65,91 @@ class TicketService:
             raise TicketNotFoundError(ticket_id)
         return Ticket.model_validate_json(row[0])
 
-    def update(self, ticket_id: str, **fields: Any) -> Ticket:
-        """Edit fields, commit, then upsert cache. (Transitions: Phase 2 / JN-10.)"""
+    def _mutate(self, ticket_id: str, message: str, **changes: Any) -> Ticket:
+        """Load, apply ``changes``, bump ``updated``, commit, then upsert cache."""
         data = self.get(ticket_id).model_dump()
-        data.update(fields)
+        data.update(changes)
         data["updated"] = _now()
         ticket = Ticket(**data)
-        self.store.write(ticket, message=f"chore({ticket_id}): update")
+        self.store.write(ticket, message=message)
         upsert_ticket(self.conn, ticket)
         self.conn.commit()
         return ticket
+
+    def update(self, ticket_id: str, **fields: Any) -> Ticket:
+        """Edit fields, commit, then upsert cache. (Transitions: Phase 2 / JN-10.)"""
+        return self._mutate(ticket_id, f"chore({ticket_id}): update", **fields)
+
+    def assign(self, ticket_id: str, assignee: str | None) -> Ticket:
+        """Set the assignee (triggers a Telegram ping in Phase 3)."""
+        return self._mutate(ticket_id, f"chore({ticket_id}): assign {assignee}", assignee=assignee)
+
+    def comment(self, ticket_id: str, *, author: str, body: str, source: str = "mcp") -> Ticket:
+        """Append a comment to the ticket's log (ids are sequential, never reused)."""
+        current = self.get(ticket_id)
+        next_id = max((c.id for c in current.comments), default=0) + 1
+        new = Comment(id=next_id, author=author, source=source, at=_now(), body=body)
+        return self._mutate(
+            ticket_id, f"chore({ticket_id}): comment", comments=[*current.comments, new]
+        )
+
+    def edit_comment(self, ticket_id: str, comment_id: int, body: str) -> Ticket:
+        """Edit an existing comment in place, stamping ``edited``."""
+        comments = [
+            c.model_copy(update={"body": body, "edited": _now()}) if c.id == comment_id else c
+            for c in self.get(ticket_id).comments
+        ]
+        return self._mutate(
+            ticket_id, f"chore({ticket_id}): edit comment {comment_id}", comments=comments
+        )
+
+    def get_watchers(self, ticket_id: str) -> list[str]:
+        """Return the ticket's watcher handles."""
+        return self.get(ticket_id).watchers
+
+    def add_watcher(self, ticket_id: str, handle: str) -> Ticket:
+        """Add a watcher (no-op if already present)."""
+        current = self.get(ticket_id)
+        if handle in current.watchers:
+            return current
+        return self._mutate(
+            ticket_id, f"chore({ticket_id}): add watcher {handle}",
+            watchers=[*current.watchers, handle],
+        )
+
+    def remove_watcher(self, ticket_id: str, handle: str) -> Ticket:
+        """Remove a watcher (no-op if absent)."""
+        current = self.get(ticket_id)
+        return self._mutate(
+            ticket_id, f"chore({ticket_id}): remove watcher {handle}",
+            watchers=[w for w in current.watchers if w != handle],
+        )
+
+    def link_epic(self, ticket_id: str, parent_id: str) -> Ticket:
+        """Link the ticket to a parent epic."""
+        message = f"chore({ticket_id}): link to epic {parent_id}"
+        return self._mutate(ticket_id, message, parent=parent_id)
+
+    def add_link(
+        self,
+        ticket_id: str,
+        *,
+        type: str,
+        url: str,
+        host: str | None = None,
+        ref: str | None = None,
+    ) -> Ticket:
+        """Append a git-host / remote link to the ticket."""
+        current = self.get(ticket_id)
+        link = Link(
+            type=LinkType(type),
+            host=Host(host) if host is not None else None,
+            url=url,
+            ref=ref,
+        )
+        return self._mutate(
+            ticket_id, f"chore({ticket_id}): add link", links=[*current.links, link]
+        )
 
     def search(self, text: str | None = None, **filters: Any) -> list[Ticket]:
         """Cache-backed full-text + field search."""
