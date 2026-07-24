@@ -25,9 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   posts. It baselines on first run (no history replay) and self-heals a rewritten
   history. Runs alongside comment pull-back; skipped when `TELEGRAM_CHAT_ID` is
   unset. Poll interval via `JIRA_NANO_MIRROR_INTERVAL` (default 3s).
-- Automated live end-to-end test of the Telegram mirror (`tests/live/`,
-  `live` marker): drives the real mirror code against a configured forum
-  supergroup and cleans up after itself. Opt-in via `JIRA_NANO_LIVE=1` +
+- Automated live end-to-end tests of the Telegram mirror (`tests/live/`,
+  `live` marker): drive the real mirror code — topics, pings, banner cards, rich
+  views, and the change-feed **auto-trigger** poller — against a configured forum
+  supergroup and clean up after themselves. Opt-in via `JIRA_NANO_LIVE=1` +
   `TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID`; skipped by default so CI stays green.
 - Telegram rich views (`telegram/views.py`): `render_ticket` (a single-ticket
   field card) and `render_board` (a numbered board/sprint listing), both wrapping
