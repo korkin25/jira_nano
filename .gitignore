@@ -22,6 +22,9 @@ config.local.*
 *.db-shm
 cache/
 .cache/
+# ...but the source subpackage of the same name is NOT the derived cache.
+!src/jira_nano/cache/
+!src/jira_nano/cache/**
 
 # ---- Python ----
 __pycache__/
