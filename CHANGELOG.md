@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-07-24
+
 ### Added
 
 - `JN-13`: HTTP API (`jira_nano.http.app`, FastAPI) — a drop-in **Jira REST**
