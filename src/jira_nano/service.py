@@ -22,6 +22,7 @@ from .errors import TicketNotFoundError
 from .ids import allocate
 from .models import Comment, Host, Link, LinkType, Status, Ticket
 from .store import GitTicketStore
+from .workflow import check_transition, legal_transitions
 
 
 def _now() -> datetime:
@@ -79,6 +80,29 @@ class TicketService:
     def update(self, ticket_id: str, **fields: Any) -> Ticket:
         """Edit fields, commit, then upsert cache. (Transitions: Phase 2 / JN-10.)"""
         return self._mutate(ticket_id, f"chore({ticket_id}): update", **fields)
+
+    def get_transitions(self, ticket_id: str) -> list[str]:
+        """Return the legal target statuses from the ticket's current status."""
+        return legal_transitions(self.workflow, str(self.get(ticket_id).status))
+
+    def transition(self, ticket_id: str, target: str) -> Ticket:
+        """Move the ticket to ``target`` if legal (`JN-D1`); else raise."""
+        ticket = self.get(ticket_id)
+        check_transition(self.workflow, ticket, target)
+        message = f"chore({ticket_id}): {ticket.status} -> {target}"
+        return self._mutate(ticket_id, message, status=target)
+
+    def set_blocked(self, ticket_id: str, reason: str | None = None) -> Ticket:
+        """Flag the ticket as blocked (impediment), optionally with a reason."""
+        return self._mutate(
+            ticket_id, f"chore({ticket_id}): blocked", blocked=True, blocked_reason=reason
+        )
+
+    def clear_blocked(self, ticket_id: str) -> Ticket:
+        """Clear the blocked flag."""
+        return self._mutate(
+            ticket_id, f"chore({ticket_id}): unblocked", blocked=False, blocked_reason=None
+        )
 
     def assign(self, ticket_id: str, assignee: str | None) -> Ticket:
         """Set the assignee (triggers a Telegram ping in Phase 3)."""

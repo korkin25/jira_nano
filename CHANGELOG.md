@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `JN-10`: workflow engine — `get_transitions`, strict `transition` (validated
+  against the configured workflow + guards, no force override), and the
+  `set_blocked` / `clear_blocked` impediment flag.
 - `JN-9`: extended service API — `assign`, `comment` / `edit_comment`,
   `add_watcher` / `remove_watcher` / `get_watchers`, `link_epic`, and `add_link`,
   all commit-first then cache-upsert via a shared `_mutate`.
