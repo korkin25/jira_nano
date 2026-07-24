@@ -1,0 +1,75 @@
+# ---- Secrets (NEVER commit) ----
+*.env
+.env
+.env.*
+*.session
+*.session-journal
+bot-token*
+*bot_token*
+*.token
+secrets.*
+config.local.*
+*.local.toml
+*.local.yaml
+*.local.yml
+
+# ---- SQLite query cache (derived / rebuildable — never source of truth) ----
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.db-wal
+*.db-shm
+cache/
+.cache/
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ---- Virtualenvs ----
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# ---- Test / lint / type-check caches ----
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+*.cover
+
+# ---- Tooling / editors / OS ----
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db

@@ -1,0 +1,40 @@
+# Minimal CI stub for jira_nano.
+#
+# Placeholder pipeline: runs on every push and pull request. It becomes
+# meaningful once application code exists — the steps below are intentionally
+# non-failing while the repository holds only docs/scaffolding. As per
+# CLAUDE.md, the real pipeline will run ruff lint, pytest on 3.11 and 3.12, and
+# a security scan (bandit + pip-audit); a tag will trigger the build/release job.
+
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+    tags: ["v*"]
+  pull_request:
+
+jobs:
+  lint-test:
+    name: Lint & test (placeholder)
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Placeholder — no code yet
+        run: |
+          echo "jira_nano CI placeholder."
+          echo "Once code lands, this job will run:"
+          echo "  - ruff (lint)"
+          echo "  - pytest (3.11 and 3.12)"
+          echo "  - bandit + pip-audit (security scan)"
+          echo "No application code present; nothing to lint or test yet."
