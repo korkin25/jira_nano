@@ -6,10 +6,14 @@ The canonical schema is ``docs/ticket-schema.md``. Cross-field rules
 """
 from __future__ import annotations
 
+import re
 from datetime import datetime
 from enum import StrEnum
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
+
+#: A valid ticket id: ``JN-`` followed by a positive integer with no leading zero.
+ID_RE = re.compile(r"^JN-[1-9]\d*$")
 
 
 class Status(StrEnum):
@@ -94,5 +98,17 @@ class Ticket(BaseModel):
     description: str = ""
     comments: list[Comment] = Field(default_factory=list)
 
-    # TODO(JN-1): model_validator(mode="after") for the presence/consistency
-    # rules listed in docs/ticket-schema.md § Validation rules.
+    @model_validator(mode="after")
+    def _check_consistency(self) -> Ticket:
+        """Enforce the presence/consistency rules of docs/ticket-schema.md."""
+        if not ID_RE.match(self.id):
+            raise ValueError(f"invalid ticket id: {self.id!r}")
+        if self.parent is not None and not ID_RE.match(self.parent):
+            raise ValueError(f"invalid parent id: {self.parent!r}")
+        if self.blocked_reason is not None and not self.blocked:
+            raise ValueError("blocked_reason is set but blocked is false")
+        if self.resolution is not None and self.status is not Status.archived:
+            raise ValueError("resolution is only allowed on archived tickets")
+        if self.updated < self.created:
+            raise ValueError("updated is before created")
+        return self

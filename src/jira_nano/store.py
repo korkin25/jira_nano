@@ -7,6 +7,7 @@ store is the write path and the history/audit reader.
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 from .models import Ticket
 
@@ -28,6 +29,6 @@ class GitTicketStore:
         """List all ticket ids present in ``tickets/``. TODO(JN-2)."""
         raise NotImplementedError
 
-    def history(self, ticket_id: str) -> list[dict]:
+    def history(self, ticket_id: str) -> list[dict[str, Any]]:
         """Commit history for a ticket (the audit trail). TODO(JN-2)."""
         raise NotImplementedError

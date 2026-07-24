@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 
 @dataclass(frozen=True)
@@ -30,10 +31,10 @@ class Workflow:
     """Configured states, transitions, guards, icons/colors (JN-D1)."""
 
     initial: str
-    states: dict[str, dict]
+    states: dict[str, Any]
     transitions: dict[str, list[str]]
     terminal: list[str]
-    guards: dict[str, dict]
+    guards: dict[str, Any]
     events: dict[str, str]
 
 

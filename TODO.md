@@ -4,12 +4,12 @@
 
 **Project initialized:** documentation, rules, and non-code skeleton are in
 place (`CLAUDE.md`, `README.md`, `docs/`, `CHANGELOG.md`, `LICENSE`,
-`.gitignore`, `AGENTS.md`, CI stub). A **Phase 1 package skeleton** is scaffolded
-(`pyproject.toml`, `src/jira_nano/` typed stubs raising `NotImplementedError`,
-`tests/` layout) — no logic implemented yet (TDD happens in the dev chat).
+`.gitignore`, `AGENTS.md`, CI stub). The **Phase 1 package skeleton** is in place
+(`pyproject.toml`, `src/jira_nano/`, `tests/`).
 
-**DEVELOPMENT happens in a separate chat** — this session only scaffolds the
-repository.
+**Implementation is underway** (TDD; a feature branch per task, merged to `main`
+when the suite is green). Done: `JN-1` (ticket models + Markdown
+(de)serialization). **Next: `JN-28`.**
 
 **All planning decisions are resolved:**
 
@@ -20,7 +20,7 @@ repository.
 - `JN-D5` — HTTP API = drop-in **Jira REST** (v2 + v3) → `docs/http-api.md`
 - `JN-D6` — MCP tool surface (copies Jira MCP servers) → `docs/mcp-tools.md`
 
-**Next action:** **start Phase 1** (implementation, in the separate dev chat).
+**Next action:** implement **`JN-28`** (config & user-directory loader), TDD.
 
 ## Legend
 
@@ -44,8 +44,8 @@ repository.
 
 ## Phase 1 — Core (git ticket store + sqlite cache + CRUD + search)
 
-> **Suggested order:** `JN-1` → `JN-28` → `JN-4` → `JN-2` → `JN-3` → `JN-5` →
-> `JN-6` → `JN-29` → `JN-7` → `JN-8`.
+> **Suggested order:** `JN-28` → `JN-4` → `JN-2` → `JN-3` → `JN-5` → `JN-6` →
+> `JN-29` → `JN-7` → `JN-8`. (`JN-1` ✅ done — see `CHANGELOG.md`.)
 > **Conventions:** **Git is the single source of truth**; the local SQLite cache
 > mirrors everything (tickets + users) for speed and serves **all** reads
 > (`get`/`list`/`search`/`board`). **Writes commit to Git first, then update the
@@ -56,7 +56,6 @@ repository.
 
 | ID | Status | Task | Details |
 |----|--------|------|---------|
-| JN-1 | ⬜ | Ticket schema & (de)serialization | Models + parse/serialize (deterministic key order, presence rules) + field validation per `docs/ticket-schema.md` (`JN-D3`). |
 | JN-28 | ⬜ | Config & user-directory loader | Load `.jira_nano/users.yaml` (git source of record) + `workflow.yaml` skeleton; validate handles; mirror users into the cache. |
 | JN-4 | ⬜ | SQLite cache schema | Full-ticket rows (frontmatter + body + comments) + join tables (`labels`/`watchers`/`links`) + `users` + FTS + `schema_version` — serves all reads. |
 | JN-2 | ⬜ | Git ticket store (**pygit2**) | Read/write/list `tickets/JN-<n>.md`; commit per change (Conventional-Commit w/ id); read history. |
