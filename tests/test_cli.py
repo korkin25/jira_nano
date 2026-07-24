@@ -15,6 +15,24 @@ def repo(tmp_path: Path) -> Path:
     return tmp_path
 
 
+def test_init_bootstraps_repo(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    assert main(["--repo", str(tmp_path), "init"]) == 0  # fresh dir, no git yet
+    assert (tmp_path / ".jira_nano" / "workflow.yaml").is_file()
+    assert (tmp_path / ".jira_nano" / "users.yaml").is_file()
+    assert (tmp_path / "tickets").is_dir()
+    capsys.readouterr()
+    assert main(["--repo", str(tmp_path), "create", "--title", "x", "--reporter", "me"]) == 0
+    assert capsys.readouterr().out.strip() == "JN-1"
+
+
+def test_init_is_idempotent(tmp_path: Path) -> None:
+    main(["--repo", str(tmp_path), "init"])
+    workflow = tmp_path / ".jira_nano" / "workflow.yaml"
+    workflow.write_text("workflow: {initial: custom}\n", encoding="utf-8")
+    main(["--repo", str(tmp_path), "init"])  # must not clobber existing config
+    assert "custom" in workflow.read_text()
+
+
 def _run(repo: Path, *args: str) -> int:
     return main(["--repo", str(repo), *args])
 

@@ -10,8 +10,10 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
+import os
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException, Request
@@ -90,3 +92,26 @@ def build_webhook_app(
         return {"ok": True}
 
     return app
+
+
+def build_app_from_env(service: TicketService) -> FastAPI:
+    """Webhook app wired with the GitLab/GitHub parsers and env-based secrets."""
+    from .github import parse_github
+    from .gitlab import parse_gitlab
+
+    secrets = {
+        "gitlab": os.environ.get("GITLAB_WEBHOOK_SECRET", ""),
+        "github": os.environ.get("GITHUB_WEBHOOK_SECRET", ""),
+    }
+    parsers: dict[str, Parser] = {"gitlab": parse_gitlab, "github": parse_github}
+    return build_webhook_app(service, secrets, parsers)
+
+
+def run(repo: Path | None = None) -> None:  # pragma: no cover - server event loop
+    """Console entry point: serve the git-host webhook receiver with uvicorn."""
+    import uvicorn
+
+    root = Path(repo) if repo is not None else Path(os.environ.get("JIRA_NANO_REPO", "."))
+    host = os.environ.get("JIRA_NANO_WEBHOOK_HOST", "127.0.0.1")
+    port = int(os.environ.get("JIRA_NANO_WEBHOOK_PORT", "8081"))
+    uvicorn.run(build_app_from_env(TicketService(root)), host=host, port=port)

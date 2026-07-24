@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `jira-nano init` — bootstraps a repository (git init + a default
+  `.jira_nano/workflow.yaml` and a `users.yaml` template) so a fresh setup needs
+  no manual file creation.
+- Run entry points for every surface, configured via env vars: `jira-nano-http`
+  (HTTP Jira REST API), `jira-nano-bot` (Telegram long-polling), and
+  `jira-nano-webhooks` (git-host receiver with the GitLab/GitHub parsers wired).
+
 ## [0.3.2] - 2026-07-24
 
 ### Changed
