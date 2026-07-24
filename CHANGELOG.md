@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `JN-12`: rounded out the MCP tool surface to match common Jira MCP servers —
+  `jira_delete_issue` (→ archive), `jira_batch_create_issues`,
+  `jira_get_project_issues`, `jira_edit_comment`, `jira_create_remote_issue_link`,
+  `jira_get_user_profile`, `jira_search_assignable_users`; golden conformance tests.
 - `JN-11`: MCP server (`jira_nano.mcp_server.build_server`, FastMCP/stdio) — thin
   tools over the service returning Jira-shaped issues; search via the JQL subset.
   `mcp` is an optional dependency (`jira-nano[mcp]`), keeping the core lightweight.

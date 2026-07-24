@@ -119,4 +119,76 @@ def build_server(service: TicketService, version: int = 2) -> FastMCP:
         """Link an issue to a parent epic."""
         return issue(service.link_epic(issue_key, epic_key))
 
+    @server.tool()
+    def jira_delete_issue(issue_key: str) -> dict[str, Any]:
+        """Archive an issue (no hard delete — JN-D6)."""
+        return issue(service.update(issue_key, status="archived"))
+
+    @server.tool()
+    def jira_batch_create_issues(issues: list[dict[str, Any]]) -> dict[str, Any]:
+        """Create several issues at once."""
+        created = [
+            issue(
+                service.create(
+                    title=spec["summary"],
+                    reporter=spec["reporter"],
+                    type=spec.get("issuetype", "Task").lower(),
+                    description=spec.get("description", ""),
+                    priority=spec.get("priority", "Medium").lower(),
+                    assignee=spec.get("assignee"),
+                    labels=spec.get("labels", []),
+                )
+            )
+            for spec in issues
+        ]
+        return {"issues": created, "total": len(created)}
+
+    @server.tool()
+    def jira_get_project_issues() -> dict[str, Any]:
+        """List every issue in the project."""
+        issues = [issue(t) for t in service.list_tickets()]
+        return {"issues": issues, "total": len(issues)}
+
+    @server.tool()
+    def jira_edit_comment(issue_key: str, comment_id: int, body: str) -> dict[str, Any]:
+        """Edit an existing comment."""
+        return issue(service.edit_comment(issue_key, comment_id, body))
+
+    @server.tool()
+    def jira_create_remote_issue_link(
+        issue_key: str,
+        url: str,
+        link_type: str = "issue",
+        host: str | None = None,
+        ref: str | None = None,
+    ) -> dict[str, Any]:
+        """Add a remote/web link (commit / MR / PR / URL) to an issue."""
+        return issue(service.add_link(issue_key, type=link_type, url=url, host=host, ref=ref))
+
+    @server.tool()
+    def jira_get_user_profile(username: str) -> dict[str, Any]:
+        """Get a user's profile from the directory."""
+        user = directory.resolve(username)
+        return {
+            "accountId": user.account_id or user.handle,
+            "name": user.handle,
+            "displayName": user.name or user.handle,
+            "emailAddress": user.email,
+        }
+
+    @server.tool()
+    def jira_search_assignable_users(query: str = "") -> dict[str, Any]:
+        """List users assignable to issues (from the directory)."""
+        needle = query.lower()
+        users = [
+            {
+                "accountId": u.account_id or u.handle,
+                "name": u.handle,
+                "displayName": u.name or u.handle,
+            }
+            for u in directory.all_users()
+            if needle in u.handle.lower() or (u.name is not None and needle in u.name.lower())
+        ]
+        return {"users": users}
+
     return server
