@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `JN-34`: remote MCP transport — `http_app` exposes the MCP server as a
+  streamable-HTTP ASGI app, and a `jira-nano-mcp-http` console script serves it.
+
 ## [0.3.0] - 2026-07-24
 
 ### Added

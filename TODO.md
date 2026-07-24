@@ -32,9 +32,9 @@ receiver, GitLab, GitHub, polling).
 **Phase 5 (Skill packaging) is COMPLETE** — `JN-25`, `JN-26`, `JN-38`, `JN-27`
 (SKILL.md, skill+MCP wiring, CLI, packaging).
 
-🏁 **ALL FIVE PHASES COMPLETE** — every planned task (`JN-1`…`JN-38`, `JN-D1`…
-`JN-D6`) is implemented, TDD, and merged. `JN-34` (remote MCP transport) remains a
-deferred runtime add-on.
+🏁 **ALL FIVE PHASES COMPLETE** — every task (`JN-1`…`JN-38`, `JN-D1`…`JN-D6`),
+including the previously-deferred `JN-34` (remote MCP over streamable-HTTP), is
+implemented, TDD, and merged. Nothing deferred.
 
 **All planning decisions are resolved:**
 
@@ -45,8 +45,8 @@ deferred runtime add-on.
 - `JN-D5` — HTTP API = drop-in **Jira REST** (v2 + v3) → `docs/http-api.md`
 - `JN-D6` — MCP tool surface (copies Jira MCP servers) → `docs/mcp-tools.md`
 
-**Next action:** none — feature-complete. Optional: `JN-34` (remote MCP transport)
-and PyPI publish (a separate explicit step).
+**Next action:** none — feature-complete. Optional: PyPI publish (a separate
+explicit step — `uv publish`, installs via `pipx`).
 
 ## Legend
 
