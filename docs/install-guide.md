@@ -26,19 +26,13 @@ pipx --version
 ## 2. Install
 
 ```bash
-pipx install "jira-nano[mcp,http,telegram]"
+pipx install "jira-nano[mcp,http,telegram]"   # >= 0.4.0 for `init` + run entrypoints
 ```
 
-> **While testing the latest:** `init` and the run entrypoints
-> (`jira-nano-http`/`-bot`/`-webhooks`) landed after the last PyPI release —
-> until the next release, install from git to get them:
->
-> ```bash
-> pipx install "jira-nano[mcp,http,telegram] @ git+https://github.com/korkin25/jira_nano.git"
-> ```
-
 Extras are optional — install only what you need: `mcp` (MCP server), `http`
-(HTTP API), `telegram` (bot). The CLI works with no extras.
+(HTTP API), `telegram` (bot). The CLI works with no extras. To run unreleased
+changes, install from git:
+`pipx install "jira-nano[...] @ git+https://github.com/korkin25/jira_nano.git"`.
 
 Verify:
 

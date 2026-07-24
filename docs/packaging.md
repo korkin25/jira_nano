@@ -22,12 +22,9 @@ pipx install "jira-nano[mcp,http,telegram]"  # everything
 
 `uv tool install "jira-nano[...]"` works identically if you prefer uv.
 
-> **Not on PyPI yet?** Until `jira-nano` is published, install straight from
-> GitHub — this works today with no PyPI account:
+> **From source** (dev / unreleased changes), install straight from GitHub:
 >
 > ```bash
-> pipx install "git+https://github.com/korkin25/jira_nano.git"
-> # with extras:
 > pipx install "jira-nano[mcp,http,telegram] @ git+https://github.com/korkin25/jira_nano.git"
 > ```
 
