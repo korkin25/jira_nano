@@ -20,6 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   suite — checkov, hadolint, trivy, semgrep, radon/xenon — and publishes the image
   to `ghcr.io/korkin25/jira-nano` (main + tags) and the OCI chart to
   `ghcr.io/korkin25/charts/jira-nano` (tags), alongside the existing PyPI release.
+  A second `docker-compose.voice.yml` (heavy, non-CI) builds a voice-enabled image
+  (`EXTRAS=...,voice` + `WITH_FFMPEG=1`) for local STT testing; model weights stay
+  out of the image on the models volume/PVC.
 
 ### Changed
 

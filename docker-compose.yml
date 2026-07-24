@@ -1,7 +1,10 @@
-# Local run of jira_nano. `docker compose up` builds the image and serves the
-# HTTP Jira REST API on http://localhost:8080. Data (the git ticket store + the
-# SQLite cache) is persisted in the `data` volume; the git repo is initialised
-# on first start by the `init` one-shot service.
+# Local run of jira_nano — LEAN image (no voice/STT), the same image CI builds.
+# `docker compose up` builds it and serves the HTTP Jira REST API on
+# http://localhost:8080. Data (the git ticket store + the SQLite cache) is
+# persisted in the `data` volume; the git repo is initialised on first start by
+# the `init` one-shot service.
+#
+# For a voice/STT-enabled stack (heavy; not for CI) use docker-compose.voice.yml.
 #
 # The optional Telegram bot and MCP-over-HTTP surfaces are provided as extra
 # services behind the `bot` / `mcp` profiles — enable with

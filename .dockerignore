@@ -14,6 +14,6 @@ docs
 examples
 chart
 auto-tests
-docker-compose.yml
+docker-compose*.yml
 *.md
 !README.md

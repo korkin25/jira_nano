@@ -55,9 +55,11 @@ STT (voice-message transcription) uses a local Whisper model. The model is
 - alternatively **devops preloads** it — run `jira-nano-voice-setup` against the
   PVC once, or set `voiceModel.existingClaim` to a pre-populated PVC.
 
-To actually run STT the container also needs the `[voice]` extra (faster-whisper).
-The default image ships without it to stay lean; build/use a voice-enabled image
-tag when you need in-cluster transcription. This is identical to the tg_notes chart.
+To actually run STT the container also needs the `[voice]` extra (faster-whisper)
+and `ffmpeg`. The default image ships without them to stay lean; build a
+voice-enabled image with the `EXTRAS=http,mcp,telegram,voice` and `WITH_FFMPEG=1`
+build args (see `docker-compose.voice.yml` for the local equivalent), then set
+`image.tag` to it. This is identical to the tg_notes chart.
 
 ## Values of note
 

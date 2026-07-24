@@ -1,0 +1,65 @@
+# Voice-enabled local stack for jira_nano — for LOCAL / manual STT testing only.
+#
+# ⚠️  NOT for CI. This builds a heavy image (faster-whisper + ffmpeg via the
+#     EXTRAS=...,voice / WITH_FFMPEG=1 build args). The Whisper model weights are
+#     still NOT baked in — they download on first use into the `models` volume
+#     (or preload them once with `jira-nano-voice-setup`).
+#
+# Run:   docker compose -f docker-compose.voice.yml up
+# The Telegram mirror bot (which transcribes voice replies) needs a bot token —
+# put TELEGRAM_BOT_TOKEN in a local .env file.
+
+services:
+  init:
+    build:
+      context: .
+      args:
+        EXTRAS: http,mcp,telegram,voice
+        WITH_FFMPEG: "1"
+    image: ghcr.io/korkin25/jira-nano:voice
+    entrypoint: ["jira-nano", "--repo", "/data/repo", "init"]
+    volumes:
+      - data:/data
+    restart: "no"
+
+  jira-nano:
+    image: ghcr.io/korkin25/jira-nano:voice
+    depends_on:
+      init:
+        condition: service_completed_successfully
+    ports:
+      - "8080:8080"
+    environment:
+      JIRA_NANO_REPO: /data/repo
+      JIRA_NANO_HTTP_HOST: 0.0.0.0
+      JIRA_NANO_HTTP_PORT: "8080"
+      HF_HOME: /models
+      XDG_CACHE_HOME: /models
+    volumes:
+      - data:/data
+      - models:/models
+    restart: unless-stopped
+
+  bot:
+    image: ghcr.io/korkin25/jira-nano:voice
+    depends_on:
+      init:
+        condition: service_completed_successfully
+    entrypoint: ["jira-nano-bot"]
+    environment:
+      JIRA_NANO_REPO: /data/repo
+      HF_HOME: /models
+      XDG_CACHE_HOME: /models
+      # Optional: JIRA_NANO_STT=cloud + OPENAI_API_KEY to use the cloud backend
+      # instead of the local Whisper model.
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - data:/data
+      - models:/models
+    restart: unless-stopped
+
+volumes:
+  data:
+  models:
