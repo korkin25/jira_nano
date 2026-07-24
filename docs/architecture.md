@@ -126,11 +126,18 @@ A single service layer backs two front doors with the same operation set:
 | `list` | List tickets with filters |
 | `board` | Board view grouped by status |
 
-- **MCP server:** exposes these as MCP tools. The tool shape is kept **close to
-  common Jira MCP servers** so existing AI workflows are drop-in with minimal
-  remapping.
-- **HTTP API:** the same operations for non-MCP clients (scripts, the Telegram
-  bot, Git-host webhook handlers).
+- **MCP server (ships first — `JN-D4`):** exposes these as MCP tools, with a
+  shape kept **close to common Jira MCP servers** so existing AI workflows are
+  drop-in. It is the flagship surface, built first to validate the core value and
+  to dogfood (agents manage `jira_nano` tickets over MCP).
+- **HTTP API (follows):** the same operations for **external** non-MCP clients
+  (scripts, third-party integrations).
+- **Internal components are in-process.** The Telegram bot and Git-host event
+  handlers invoke the service layer **directly**, not via HTTP. A webhook receiver
+  listens over HTTP to *receive* events but handles them through the service
+  layer, not the public HTTP API.
+- **Thin adapters.** MCP and HTTP hold no logic; all mutation, validation, and
+  Git writes live in the one service layer.
 - **Validation:** every mutating call validates the requested transition against
   the configured workflow (`docs/status-model.md`) before writing to Git.
 

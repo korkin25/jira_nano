@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Resolved decision `JN-D4`: **MCP ships before the HTTP API**; both are thin
+  adapters over the shared service layer, and internal components (Telegram bot,
+  git-host handlers) call that layer in-process rather than over HTTP
+  (`docs/architecture.md` §4).
 - Resolved decision `JN-D3`: canonical ticket-file schema in
   `docs/ticket-schema.md` — `JN-<n>.md` frontmatter (`type`/`parent` hierarchy,
   single `assignee` + `reporter` + `watchers`, four-level `priority`, `blocked`
