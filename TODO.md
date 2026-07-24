@@ -15,7 +15,7 @@ CI runs the real suite.
 
 **Phase 2 in progress:** `JN-9` (service API), `JN-10` (workflow engine), `JN-33`
 (Jira mapper), `JN-30` (JQL parser), `JN-11` (MCP server), `JN-12` (Jira tools),
-`JN-31` (Markdown↔ADF) done. **Next: `JN-32`.**
+`JN-31` (ADF), `JN-32` (HTTP auth) done. **Next: `JN-13` (last Phase 2 core).**
 
 **All planning decisions are resolved:**
 
@@ -26,7 +26,7 @@ CI runs the real suite.
 - `JN-D5` — HTTP API = drop-in **Jira REST** (v2 + v3) → `docs/http-api.md`
 - `JN-D6` — MCP tool surface (copies Jira MCP servers) → `docs/mcp-tools.md`
 
-**Next action:** implement **`JN-32`** (HTTP auth: Basic + Bearer PAT + OAuth 2.0), TDD.
+**Next action:** implement **`JN-13`** (HTTP API — Jira REST v2+v3), TDD.
 
 ## Legend
 
@@ -50,8 +50,8 @@ CI runs the real suite.
 
 ## Phase 2 — MCP + API
 
-> **Order:** `JN-32` → `JN-13`.
-> (`JN-9`, `JN-10`, `JN-33`, `JN-30`, `JN-11`, `JN-12`, `JN-31` ✅ done.) **MCP ships before HTTP** (`JN-D4`). Adapters are thin: a
+> **Order:** `JN-13` (then `JN-34` deferred).
+> (`JN-9`, `JN-10`, `JN-33`, `JN-30`, `JN-11`, `JN-12`, `JN-31`, `JN-32` ✅ done.) **MCP ships before HTTP** (`JN-D4`). Adapters are thin: a
 > shared presentation layer — Jira field mapper (`JN-33`) + JQL parser (`JN-30`) —
 > sits between the one service layer and both the MCP and HTTP adapters. Internal
 > components (bot, git-host handlers) call the service layer **in-process**, not
@@ -60,7 +60,6 @@ CI runs the real suite.
 
 | ID | Status | Task | Details |
 |----|--------|------|---------|
-| JN-32 | ⬜ | HTTP auth | Basic + Bearer PAT + OAuth 2.0 (auth-code + client-credentials); secrets from env. |
 | JN-13 | ⬜ | HTTP API | FastAPI `/rest/api/{2,3}/` (+`latest`→v3) per `docs/http-api.md`; endpoints→service, JQL `JN-30`, bodies `JN-33`(+`JN-31`), auth `JN-32`, Jira error envelope, v2 startAt vs v3 nextPageToken. Ships after MCP. |
 | JN-34 | ⬜ | MCP streamable-HTTP transport | Deferred add-on: expose the MCP server (`JN-11`) over remote streamable-HTTP in addition to stdio. |
 

@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `JN-32`: HTTP authentication (`jira_nano.http.auth`) — Basic, Bearer PAT, and
+  OAuth 2.0 `client_credentials` (jira_nano issues its own bearer tokens);
+  credentials loaded from the environment.
 - `JN-31`: Markdown↔ADF converter (`jira_nano.jira.adf`) — paragraphs, headings,
   code blocks, bullet/ordered lists, and inline marks (strong/em/code/link); now
   used by the mapper for v3 bodies.
