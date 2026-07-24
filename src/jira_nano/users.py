@@ -59,3 +59,7 @@ class UserDirectory:
             return self._users[handle]
         except KeyError as exc:  # pragma: no cover - trivial
             raise UnknownHandleError(handle) from exc
+
+    def all_users(self) -> list[User]:
+        """Return every user in the directory."""
+        return list(self._users.values())

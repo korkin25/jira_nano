@@ -41,7 +41,7 @@ _DESCRIPTION_RE = re.compile(r"\A\s*## Description[ \t]*\n", re.DOTALL)
 _COMMENT_HEADER_RE = re.compile(r"<!-- c (?P<attrs>.*?) -->")
 
 
-def _iso(dt: datetime) -> str:
+def iso_utc(dt: datetime) -> str:
     """Format a datetime as ISO-8601 UTC with a ``Z`` suffix."""
     if dt.tzinfo is not None:
         dt = dt.astimezone(UTC).replace(tzinfo=None)
@@ -82,8 +82,8 @@ def _frontmatter(ticket: Ticket) -> dict[str, Any]:
     if ticket.parent is not None:
         fm["parent"] = ticket.parent
     fm["links"] = [_link_dict(link) for link in ticket.links]
-    fm["created"] = _iso(ticket.created)
-    fm["updated"] = _iso(ticket.updated)
+    fm["created"] = iso_utc(ticket.created)
+    fm["updated"] = iso_utc(ticket.updated)
     return fm
 
 
@@ -100,9 +100,9 @@ def dumps(ticket: Ticket) -> str:
     if ticket.comments:
         blocks = []
         for c in ticket.comments:
-            header = f"<!-- c id={c.id} author={c.author} source={c.source} at={_iso(c.at)}"
+            header = f"<!-- c id={c.id} author={c.author} source={c.source} at={iso_utc(c.at)}"
             if c.edited is not None:
-                header += f" edited={_iso(c.edited)}"
+                header += f" edited={iso_utc(c.edited)}"
             header += " -->"
             blocks.append(f"{header}\n{c.body.strip()}")
         doc += "\n## Comments\n\n" + "\n\n".join(blocks) + "\n"
