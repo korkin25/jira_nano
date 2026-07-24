@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `JN-13`: HTTP API (`jira_nano.http.app`, FastAPI) — a drop-in **Jira REST**
+  surface serving `/rest/api/{2,3,latest}/…`: issue CRUD (delete → archive),
+  transitions, assignee, comments, v2 (`startAt`) and v3 (`nextPageToken`) search,
+  `myself`, and an OAuth token endpoint; Jira error envelope; `mcp`/`http` are
+  optional extras. **Phase 2 core (MCP + HTTP) complete.**
 - `JN-32`: HTTP authentication (`jira_nano.http.auth`) — Basic, Bearer PAT, and
   OAuth 2.0 `client_credentials` (jira_nano issues its own bearer tokens);
   credentials loaded from the environment.
