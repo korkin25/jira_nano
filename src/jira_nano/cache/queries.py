@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import sqlite3
 
-from ..models import Status, Ticket
+from jira_nano.models import Status, Ticket
 
 
 def search(conn: sqlite3.Connection, text: str | None = None, **filters: object) -> list[Ticket]:

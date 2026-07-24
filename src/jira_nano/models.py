@@ -7,12 +7,12 @@ The canonical schema is ``docs/ticket-schema.md``. Cross-field rules
 from __future__ import annotations
 
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
 
-class Status(str, Enum):
+class Status(StrEnum):
     todo = "todo"
     in_progress = "in-progress"
     in_review = "in-review"
@@ -20,26 +20,26 @@ class Status(str, Enum):
     archived = "archived"
 
 
-class Type(str, Enum):
+class Type(StrEnum):
     task = "task"
     bug = "bug"
     epic = "epic"
 
 
-class Priority(str, Enum):
+class Priority(StrEnum):
     low = "low"
     medium = "medium"
     high = "high"
     urgent = "urgent"
 
 
-class Resolution(str, Enum):
+class Resolution(StrEnum):
     wontfix = "wontfix"
     duplicate = "duplicate"
     obsolete = "obsolete"
 
 
-class LinkType(str, Enum):
+class LinkType(StrEnum):
     commit = "commit"
     mr = "mr"
     pr = "pr"
@@ -48,7 +48,7 @@ class LinkType(str, Enum):
     telegram = "telegram"  # ticket <-> forum-topic mapping (JN-15)
 
 
-class Host(str, Enum):
+class Host(StrEnum):
     gitlab = "gitlab"
     github = "github"
 

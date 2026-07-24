@@ -3,8 +3,8 @@ from __future__ import annotations
 
 import sqlite3
 
-from ..models import Ticket
-from ..users import User
+from jira_nano.models import Ticket
+from jira_nano.users import User
 
 
 def upsert_ticket(conn: sqlite3.Connection, ticket: Ticket) -> None:
