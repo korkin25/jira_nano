@@ -4,7 +4,9 @@
 
 **Project initialized:** documentation, rules, and non-code skeleton are in
 place (`CLAUDE.md`, `README.md`, `docs/`, `CHANGELOG.md`, `LICENSE`,
-`.gitignore`, `AGENTS.md`, CI stub). No application code exists yet.
+`.gitignore`, `AGENTS.md`, CI stub). A **Phase 1 package skeleton** is scaffolded
+(`pyproject.toml`, `src/jira_nano/` typed stubs raising `NotImplementedError`,
+`tests/` layout) — no logic implemented yet (TDD happens in the dev chat).
 
 **DEVELOPMENT happens in a separate chat** — this session only scaffolds the
 repository.

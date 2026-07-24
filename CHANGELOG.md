@@ -56,6 +56,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Phase 1 package skeleton: `pyproject.toml` (hatchling, pydantic/pygit2/PyYAML,
+  ruff/pytest/mypy config) and `src/jira_nano/` typed stubs — `models`,
+  `serialization`, `ids`, `config`, `users`, `store`, `cache/` (schema/rebuild/
+  upsert/queries), `sync`, `service` — plus a `tests/` layout. All bodies raise
+  `NotImplementedError`; implementation is TDD in the dev chat.
 - Initial documentation and non-code skeleton: `CLAUDE.md` (project rules,
   language rules, autonomous development workflow, conventions), `README.md`,
   `docs/architecture.md`, `docs/features.md`, `docs/status-model.md` (draft),

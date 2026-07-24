@@ -1,0 +1,52 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "jira-nano"
+version = "0.0.0"
+description = "A lightweight, AI-native, git-backed issue tracker."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "GPL-3.0-or-later"
+authors = [{ name = "Evgenii Kuzakov" }]
+keywords = ["issue-tracker", "jira", "mcp", "git", "telegram"]
+dependencies = [
+    "pygit2>=1.14",   # JN-2 / JN-29: git store + change detection
+    "pydantic>=2.6",  # JN-1: domain models + validation
+    "pyyaml>=6.0",    # JN-1 / JN-28: frontmatter + config
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "ruff>=0.5",
+    "mypy>=1.10",
+    "bandit>=1.7",
+    "pip-audit>=2.7",
+    "types-pyyaml",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/jira_nano"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "TID", "RUF"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+files = ["src", "tests"]
+
+[tool.coverage.run]
+source = ["jira_nano"]

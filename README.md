@@ -4,10 +4,11 @@ A lightweight, **AI-native issue tracker** where the source of record is a Git
 repository, the query layer is a rebuildable SQLite cache, and human
 communication happens through a Telegram bot mirror instead of email.
 
-> **Status: planning.** No application code yet — this repository currently holds
-> documentation, rules, and non-code scaffolding. Development happens in a
-> separate session. See [`TODO.md`](TODO.md) for the current state and next
-> action.
+> **Status: planning.** A Phase 1 package **skeleton** is scaffolded
+> (`pyproject.toml`, `src/jira_nano/` typed stubs that all raise
+> `NotImplementedError`, and a `tests/` layout) — no logic is implemented yet.
+> Development happens in a separate session. See [`TODO.md`](TODO.md) for the
+> current state and next action.
 
 ## Why
 
