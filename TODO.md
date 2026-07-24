@@ -21,8 +21,8 @@ CI runs the real suite.
 service layer. `JN-34` (remote MCP streamable-HTTP transport) is a deferred
 runtime add-on.
 
-**Phase 3 in progress:** `JN-14` (bot skeleton), `JN-15` (forum topics) done.
-**Next: `JN-35`.**
+**Phase 3 in progress:** `JN-14` (bot skeleton), `JN-15` (forum topics), `JN-35`
+(git change-feed) done. **Next: `JN-17`.**
 
 **All planning decisions are resolved:**
 
@@ -33,7 +33,7 @@ runtime add-on.
 - `JN-D5` — HTTP API = drop-in **Jira REST** (v2 + v3) → `docs/http-api.md`
 - `JN-D6` — MCP tool surface (copies Jira MCP servers) → `docs/mcp-tools.md`
 
-**Next action:** implement **`JN-35`** (git change-feed), TDD.
+**Next action:** implement **`JN-17`** (status icons/colors), TDD.
 
 ## Legend
 
@@ -71,7 +71,7 @@ runtime add-on.
 
 ## Phase 3 — Telegram bot mirror
 
-> **Order:** `JN-35` → `JN-17` → `JN-16` → `JN-18` → `JN-19`. (`JN-14`, `JN-15` ✅ done.)
+> **Order:** `JN-17` → `JN-16` → `JN-18` → `JN-19`. (`JN-14`, `JN-15`, `JN-35` ✅ done.)
 > The bot is an internal component — it calls the service layer **in-process**
 > (`JN-D4`) and reacts to committed ticket changes via the git change-feed
 > (`JN-35`), so it mirrors changes from every source (MCP/HTTP/CLI/git pull). The
@@ -79,7 +79,6 @@ runtime add-on.
 
 | ID | Status | Task | Details |
 |----|--------|------|---------|
-| JN-35 | ⬜ | Git change-feed | Derive semantic per-ticket events (status/assignee/blocked/comment/link diffs) from committed changes (on `JN-29`); consumed by the mirror. |
 | JN-17 | ⬜ | Status icons/colors | Map status→topic color + title emoji (`JN-D1`); 🚫 on `blocked`; `editForumTopic` on change. |
 | JN-16 | ⬜ | Assignment pings | `@mention` the assignee (Telegram handle via `users.yaml`) in the ticket topic on assign. |
 | JN-18 | ⬜ | Update posts | Post change deltas (transition/edit/new link) from the feed into the ticket topic. |
