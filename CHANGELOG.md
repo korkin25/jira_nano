@@ -56,6 +56,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `JN-28`: config & user-directory loader — repo paths, `.jira_nano/workflow.yaml`
+  (with a built-in default per `JN-D1`), and `.jira_nano/users.yaml` with handle
+  resolution.
 - `JN-1`: ticket domain models (pydantic, with consistency validation) and
   byte-stable Markdown (de)serialization (`loads`/`dumps`) for `tickets/JN-<n>.md`.
 - Phase 1 package skeleton: `pyproject.toml` (hatchling, pydantic/pygit2/PyYAML,

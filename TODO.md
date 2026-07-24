@@ -8,8 +8,8 @@ place (`CLAUDE.md`, `README.md`, `docs/`, `CHANGELOG.md`, `LICENSE`,
 (`pyproject.toml`, `src/jira_nano/`, `tests/`).
 
 **Implementation is underway** (TDD; a feature branch per task, merged to `main`
-when the suite is green). Done: `JN-1` (ticket models + Markdown
-(de)serialization). **Next: `JN-28`.**
+when the suite is green). Done: `JN-1` (models + serialization), `JN-28` (config
++ user directory). **Next: `JN-4`.**
 
 **All planning decisions are resolved:**
 
@@ -20,7 +20,7 @@ when the suite is green). Done: `JN-1` (ticket models + Markdown
 - `JN-D5` — HTTP API = drop-in **Jira REST** (v2 + v3) → `docs/http-api.md`
 - `JN-D6` — MCP tool surface (copies Jira MCP servers) → `docs/mcp-tools.md`
 
-**Next action:** implement **`JN-28`** (config & user-directory loader), TDD.
+**Next action:** implement **`JN-4`** (SQLite cache schema), TDD.
 
 ## Legend
 
@@ -44,8 +44,8 @@ when the suite is green). Done: `JN-1` (ticket models + Markdown
 
 ## Phase 1 — Core (git ticket store + sqlite cache + CRUD + search)
 
-> **Suggested order:** `JN-28` → `JN-4` → `JN-2` → `JN-3` → `JN-5` → `JN-6` →
-> `JN-29` → `JN-7` → `JN-8`. (`JN-1` ✅ done — see `CHANGELOG.md`.)
+> **Suggested order:** `JN-4` → `JN-2` → `JN-3` → `JN-5` → `JN-6` → `JN-29` →
+> `JN-7` → `JN-8`. (`JN-1`, `JN-28` ✅ done — see `CHANGELOG.md`.)
 > **Conventions:** **Git is the single source of truth**; the local SQLite cache
 > mirrors everything (tickets + users) for speed and serves **all** reads
 > (`get`/`list`/`search`/`board`). **Writes commit to Git first, then update the
@@ -56,7 +56,6 @@ when the suite is green). Done: `JN-1` (ticket models + Markdown
 
 | ID | Status | Task | Details |
 |----|--------|------|---------|
-| JN-28 | ⬜ | Config & user-directory loader | Load `.jira_nano/users.yaml` (git source of record) + `workflow.yaml` skeleton; validate handles; mirror users into the cache. |
 | JN-4 | ⬜ | SQLite cache schema | Full-ticket rows (frontmatter + body + comments) + join tables (`labels`/`watchers`/`links`) + `users` + FTS + `schema_version` — serves all reads. |
 | JN-2 | ⬜ | Git ticket store (**pygit2**) | Read/write/list `tickets/JN-<n>.md`; commit per change (Conventional-Commit w/ id); read history. |
 | JN-3 | ⬜ | Ticket id allocation | Sequential `JN-<n>` (max+1), never reused; lock for concurrent creates. |
