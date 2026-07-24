@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `JN-36`: webhook receiver + normalized event model (`jira_nano.githost.webhook`)
+  — a FastAPI listener (separate from the Jira REST API) that verifies GitLab
+  (token) / GitHub (HMAC-SHA256) signatures, normalizes payloads into
+  `GitHostEvent`, and dispatches them (link + transition).
 - `JN-23`: link writer (`jira_nano.githost.links.link_ticket`) — appends a
   commit/MR/PR link to a ticket's `links[]`, idempotent on replay.
 - `JN-24`: git-host event → transition (`jira_nano.githost.apply`) — advances a
