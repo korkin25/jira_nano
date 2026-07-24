@@ -26,7 +26,8 @@ runtime add-on.
 posts, comment pull-back).
 
 **Phase 4 in progress:** `JN-20` (parser), `JN-24` (event→transition), `JN-23`
-(link writer), `JN-36` (receiver), `JN-21` (GitLab) done. **Next: `JN-22`.**
+(link writer), `JN-36` (receiver), `JN-21` (GitLab), `JN-22` (GitHub) done.
+**Next: `JN-37` (last Phase 4).**
 
 **All planning decisions are resolved:**
 
@@ -37,7 +38,7 @@ posts, comment pull-back).
 - `JN-D5` — HTTP API = drop-in **Jira REST** (v2 + v3) → `docs/http-api.md`
 - `JN-D6` — MCP tool surface (copies Jira MCP servers) → `docs/mcp-tools.md`
 
-**Next action:** implement **`JN-22`** (GitHub integration), TDD.
+**Next action:** implement **`JN-37`** (polling fallback) — completes Phase 4.
 
 ## Legend
 
@@ -75,7 +76,7 @@ posts, comment pull-back).
 
 ## Phase 4 — Git-host integration (GitLab / GitHub)
 
-> **Order:** `JN-22` → `JN-37`. (`JN-20`, `JN-24`, `JN-23`, `JN-36`, `JN-21` ✅ done.)
+> **Remaining:** `JN-37`. (`JN-20`, `JN-24`, `JN-23`, `JN-36`, `JN-21`, `JN-22` ✅ done.)
 > A shared webhook receiver (`JN-36`) normalizes GitLab/GitHub payloads into one
 > event model, so the host adapters stay thin and symmetric; polling (`JN-37`) is
 > the fallback where webhooks are unavailable. The receiver is separate from the
@@ -83,7 +84,6 @@ posts, comment pull-back).
 
 | ID | Status | Task | Details |
 |----|--------|------|---------|
-| JN-22 | ⬜ | GitHub integration | Symmetric: GitHub push/PR payloads → the common event; same pipeline. |
 | JN-37 | ⬜ | Polling fallback | Poll host APIs for MRs/commits where webhooks are unavailable; same pipeline. |
 
 ## Phase 5 — Skill packaging
