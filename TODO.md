@@ -68,17 +68,23 @@ explicit step — `uv publish`, installs via `pipx`).
 - Numbering is **mandatory**, sequential, and **never reused** — a retired id
   stays retired.
 
-## Phase 2 — MCP + API
+## Not built (by decision — future work)
 
-> **Phase 2 core done** (`JN-9`, `JN-10`, `JN-33`, `JN-30`, `JN-11`, `JN-12`,
-> `JN-31`, `JN-32`, `JN-13` ✅). Only `JN-34` (deferred) remains. Adapters are thin: a
-> shared presentation layer — Jira field mapper (`JN-33`) + JQL parser (`JN-30`) —
-> sits between the one service layer and both the MCP and HTTP adapters. Internal
-> components (bot, git-host handlers) call the service layer **in-process**, not
-> via HTTP. `JN-34` (remote MCP transport) is a deferred add-on, off the critical
-> path.
+All planned tasks (`JN-1`…`JN-38`) and decisions (`JN-D1`…`JN-D6`) are done and
+released. The following were **deliberately deferred or scoped out** and remain
+open for a future version:
 
-| ID | Status | Task | Details |
-|----|--------|------|---------|
-| JN-34 | ⬜ | MCP streamable-HTTP transport | Deferred add-on: expose the MCP server (`JN-11`) over remote streamable-HTTP in addition to stdio. |
+- **Deferred to v2** (`JN-D6`): worklogs / time tracking, sprints & agile,
+  versions / releases, attachments (files-in-git story).
+- **Jira-compat stubs** (`JN-D6` / `JN-D5`): field-metadata (`createmeta`/
+  `editmeta`), projects/components, and generic issue links (blocks/relates)
+  beyond `parent` — currently minimal/absent.
+- **Auth** (`JN-D5`): OAuth 2.0 authorization-code flow (only `client_credentials`
+  is implemented); full Markdown↔ADF node coverage (common nodes only).
+- **Out of scope** (`JN-D6`): JSM / service desk, proforma forms, SLA, and the
+  other Atlassian products.
+- **Packaging** (`JN-D2`): single-file build (PyInstaller/shiv) — evaluated, not
+  built.
+- **Housekeeping:** the unused `cache.Cache` facade class is a vestigial stub
+  (the cache works via the module functions).
 
