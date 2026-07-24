@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-07-24
+
+### Changed
+
+- CI: bumped GitHub Actions to their latest majors (`checkout` / `setup-python` /
+  `upload-artifact` @v7; publish action stays `release/v1`) and configured bandit
+  to skip documented false positives (`B105` env-var names / `Bearer` literal,
+  `B608` parameterized SQL). The full pipeline (lint, type-check, tests 3.11/3.12,
+  security scan) is green end-to-end.
+
 ## [0.3.1] - 2026-07-24
 
 ### Added
