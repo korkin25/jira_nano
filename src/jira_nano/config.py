@@ -54,11 +54,11 @@ class Workflow:
 DEFAULT_WORKFLOW_RAW: dict[str, Any] = {
     "initial": "todo",
     "states": [
-        {"name": "todo", "icon": "📋", "color": "yellow"},
-        {"name": "in-progress", "icon": "🔧", "color": "purple"},
-        {"name": "in-review", "icon": "👀", "color": "pink"},
-        {"name": "done", "icon": "✅", "color": "green"},
-        {"name": "archived", "icon": "📦", "color": "red"},
+        {"name": "todo", "icon": "🟡", "color": "yellow"},
+        {"name": "in-progress", "icon": "🔵", "color": "blue"},
+        {"name": "in-review", "icon": "🟣", "color": "purple"},
+        {"name": "done", "icon": "🟢", "color": "green"},
+        {"name": "archived", "icon": "⚫", "color": "red"},
     ],
     "transitions": {
         "todo": ["in-progress", "archived"],

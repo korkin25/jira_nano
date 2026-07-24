@@ -37,12 +37,12 @@ def _ticket(**over: Any) -> Ticket:
 
 
 def test_topic_title_status_icon() -> None:
-    assert topic_title(DEFAULT_WORKFLOW, _ticket(status="todo")) == "📋 JN-1: Fix"
-    assert topic_title(DEFAULT_WORKFLOW, _ticket(status="in-progress")) == "🔧 JN-1: Fix"
+    assert topic_title(DEFAULT_WORKFLOW, _ticket(status="todo")) == "🟡 JN-1: Fix"
+    assert topic_title(DEFAULT_WORKFLOW, _ticket(status="in-progress")) == "🔵 JN-1: Fix"
 
 
 def test_topic_title_blocked() -> None:
-    assert topic_title(DEFAULT_WORKFLOW, _ticket(blocked=True)) == "📋🚫 JN-1: Fix"
+    assert topic_title(DEFAULT_WORKFLOW, _ticket(blocked=True)) == "🟡🚫 JN-1: Fix"
 
 
 def test_topic_color() -> None:
@@ -51,11 +51,11 @@ def test_topic_color() -> None:
 
 
 def test_status_icon() -> None:
-    assert status_icon(DEFAULT_WORKFLOW, _ticket(status="in-review")) == "👀"
+    assert status_icon(DEFAULT_WORKFLOW, _ticket(status="in-review")) == "🟣"
 
 
 def test_header_format() -> None:
-    assert header(DEFAULT_WORKFLOW, _ticket()) == "📋 <b>Fix</b> <code>JN-1</code>"
+    assert header(DEFAULT_WORKFLOW, _ticket()) == "🟡 <b>Fix</b> <code>JN-1</code>"
 
 
 @pytest.fixture
@@ -69,4 +69,4 @@ def test_refresh_topic_renames_on_status(service: TicketService, gateway: FakeGa
     service.assign(created.id, "korkin25")
     service.transition(created.id, "in-progress")
     asyncio.run(refresh_topic(service, gateway, created.id))
-    assert gateway.edits[-1][1] == "🔧 JN-1: Fix"
+    assert gateway.edits[-1][1] == "🔵 JN-1: Fix"

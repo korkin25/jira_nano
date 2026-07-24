@@ -40,7 +40,7 @@ def test_ping_format(service: TicketService, gateway: FakeGateway) -> None:
     t = service.create(title="Fix", reporter="e")
     service.assign(t.id, "korkin25")
     asyncio.run(ping_assignee(service, gateway, _directory(service), t.id))
-    assert gateway.posts[-1][1] == "📋 <b>Fix</b> <code>JN-1</code>\n↳ 👤 assigned to @korkin25"
+    assert gateway.posts[-1][1] == "🟡 <b>Fix</b> <code>JN-1</code>\n↳ 👤 assigned to @korkin25"
 
 
 def test_ping_unknown_handle_falls_back(service: TicketService, gateway: FakeGateway) -> None:

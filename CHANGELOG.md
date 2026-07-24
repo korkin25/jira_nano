@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Telegram rich views (`telegram/views.py`): `render_ticket` (a single-ticket
+  field card) and `render_board` (a numbered board/sprint listing), both wrapping
+  their structured content in a `<blockquote>` so listings read cleanly. Ticket
+  ids stay monospace/copyable and links render as real hyperlinks.
+
 ### Changed
 
 - Telegram mirror: redesigned message formatting. Pings and update posts share a
@@ -16,6 +23,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   real hyperlinks. Dynamic text is HTML-escaped; forum topic names stay plain text
   (Telegram does not format them). `telegram/format.py:ticket_ref` is the single
   place to later turn the id into a deep link.
+- Default workflow status icons are now bright colored circles (🟡 todo, 🔵
+  in-progress, 🟣 in-review, 🟢 done, ⚫ archived) instead of pictographs, for a
+  clearer at-a-glance status colour in topic names and messages. Configurable per
+  workflow via `.jira_nano/workflow.yaml`.
 
 ## [0.4.1] - 2026-07-24
 
