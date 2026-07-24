@@ -58,3 +58,18 @@ def test_update_commits_a_second_time(service: TicketService, tmp_path: Path) ->
     service.update(created.id, status="in-progress")
     history = GitTicketStore(tmp_path).history(created.id)
     assert len(history) == 2
+
+
+def test_service_list_search_board(service: TicketService) -> None:
+    service.create(title="alpha bug", reporter="e", labels=["backend"])
+    b = service.create(title="beta task", reporter="e")
+    service.update(b.id, status="in-progress")
+
+    assert {t.id for t in service.list_tickets()} == {"JN-1", "JN-2"}
+    assert [t.id for t in service.list_tickets(label="backend")] == ["JN-1"]
+    assert [t.id for t in service.search("beta")] == ["JN-2"]
+    board = service.board()
+    assert {s.value: [t.id for t in ts] for s, ts in board.items()} == {
+        "todo": ["JN-1"],
+        "in-progress": ["JN-2"],
+    }

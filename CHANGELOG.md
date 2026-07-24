@@ -56,6 +56,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `JN-8`: cache-backed reads — `search` (FTS5 + field filters), `list_tickets`
+  (status/assignee/priority/type/label), and `board` (grouped by status), exposed
+  on `TicketService`. **Completes Phase 1 (Core).**
 - `JN-7`: CRUD service layer (`TicketService`) — the single entry point;
   `create` (initial status, sequential id), `get` (from cache), `update`
   (fields), each committing to Git first, then upserting the cache.

@@ -13,6 +13,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from .cache import queries
 from .cache.rebuild import rebuild
 from .cache.schema import create_schema
 from .cache.upsert import upsert_ticket
@@ -74,3 +75,15 @@ class TicketService:
         upsert_ticket(self.conn, ticket)
         self.conn.commit()
         return ticket
+
+    def search(self, text: str | None = None, **filters: Any) -> list[Ticket]:
+        """Cache-backed full-text + field search."""
+        return queries.search(self.conn, text, **filters)
+
+    def list_tickets(self, **filters: Any) -> list[Ticket]:
+        """Cache-backed filtered list."""
+        return queries.list_tickets(self.conn, **filters)
+
+    def board(self) -> dict[Status, list[Ticket]]:
+        """Tickets grouped by workflow status."""
+        return queries.board(self.conn)
