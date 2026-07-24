@@ -35,7 +35,9 @@ class TicketService:
         self.paths.config_dir.mkdir(parents=True, exist_ok=True)
         self.store = GitTicketStore(self.paths.root)
         self.workflow = load_workflow(self.paths.config_dir)
-        self.conn = sqlite3.connect(str(self.paths.cache_db))
+        # check_same_thread=False: the HTTP app (JN-13) serves requests from a
+        # threadpool; access stays effectively serialized (one writer path).
+        self.conn = sqlite3.connect(str(self.paths.cache_db), check_same_thread=False)
         create_schema(self.conn)
         rebuild(self.conn, self.paths.root)
 
