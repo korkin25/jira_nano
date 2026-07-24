@@ -42,16 +42,26 @@ repository.
 
 ## Phase 1 — Core (git ticket store + sqlite cache + CRUD + search)
 
+> **Suggested order:** `JN-1` → `JN-28` → `JN-4` → `JN-2` → `JN-3` → `JN-5` →
+> `JN-6` → `JN-29` → `JN-7` → `JN-8`.
+> **Conventions:** point `get` reads the file (source of record); `list`/`search`/
+> `board` read the cache. Status transitions (`JN-D1`) are validated in Phase 2
+> (`JN-10`) — Phase 1 `create` sets initial `todo` and `update` edits fields only.
+> The user directory (`.jira_nano/users.yaml`) is git-backed (source of record)
+> and mirrored into the cache for speed only.
+
 | ID | Status | Task | Details |
 |----|--------|------|---------|
-| JN-1 | ⬜ | Ticket-file schema | Implement parse/serialize/validate per `docs/ticket-schema.md` (spec locked by `JN-D3`). |
-| JN-2 | ⬜ | Git ticket store | Read/write/parse `tickets/JN-<n>.md`; commit per change. |
-| JN-3 | ⬜ | Ticket id allocation | Sequential `JN-<n>` allocator, never reused. |
-| JN-4 | ⬜ | SQLite cache schema | Tables/indexes mirroring frontmatter. |
-| JN-5 | ⬜ | Cache rebuild | Full rebuild from `tickets/*.md`. |
-| JN-6 | ⬜ | Cache incremental upsert | Update a single row after a local write. |
-| JN-7 | ⬜ | CRUD service layer | Create / read / update over the store. |
-| JN-8 | ⬜ | Search + list + board | Cache-backed search, filtered list, board view. |
+| JN-1 | ⬜ | Ticket schema & (de)serialization | Models + parse/serialize (deterministic key order, presence rules) + field validation per `docs/ticket-schema.md` (`JN-D3`). |
+| JN-28 | ⬜ | Config & user-directory loader | Load `.jira_nano/users.yaml` (git source of record) + `workflow.yaml` skeleton; validate handles; mirror users into the cache. |
+| JN-4 | ⬜ | SQLite cache schema | `tickets` + join tables (`labels`/`watchers`/`links`) + `users` + FTS + `schema_version`. |
+| JN-2 | ⬜ | Git ticket store (**pygit2**) | Read/write/list `tickets/JN-<n>.md`; commit per change (Conventional-Commit w/ id); read history. |
+| JN-3 | ⬜ | Ticket id allocation | Sequential `JN-<n>` (max+1), never reused; lock for concurrent creates. |
+| JN-5 | ⬜ | Cache rebuild | Full rebuild from `tickets/*.md` + `.jira_nano/` (users/workflow); idempotent. |
+| JN-6 | ⬜ | Cache incremental upsert | Upsert one ticket's rows (or a user) after a local write, no full walk. |
+| JN-29 | ⬜ | Background cache sync | Detect external git changes (stored HEAD SHA + pygit2 diff) and working-tree edits; refresh the cache incrementally. |
+| JN-7 | ⬜ | CRUD service layer | Single entry, **MCP-first** API: `create` (initial `todo`), `get` (from file), `update` (fields). |
+| JN-8 | ⬜ | Search + list + board | Cache-backed `search` (FTS+filters), filtered `list`, `board` grouped by status. |
 
 ## Phase 2 — MCP + API
 

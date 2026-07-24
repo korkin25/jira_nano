@@ -126,7 +126,8 @@ korkin25:
 
 `users.yaml` lives alongside `workflow.yaml` under `.jira_nano/`. It is **not**
 secret and **is** versioned (unlike credentials). All handles referenced by a
-ticket must resolve here.
+ticket must resolve here. Like tickets, it is the **source of record in Git** and
+is mirrored into the SQLite cache for fast lookup only.
 
 ## Body: `## Description`
 

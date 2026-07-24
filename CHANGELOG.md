@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Refined the Phase 1 plan: chose **pygit2** for the git store, added a config /
+  user-directory loader (`JN-28`) and a background cache-sync watcher (`JN-29`);
+  the user directory (`.jira_nano/users.yaml`) is git-backed (source of record)
+  and mirrored into the SQLite cache for speed.
 - Resolved decision `JN-D5`: HTTP API specced as a drop-in **Jira REST** surface
   in `docs/http-api.md` — serves **both v2 and v3** dialects (plain-string vs ADF
   bodies, username vs accountId, classic vs token-paginated search), mirrors the

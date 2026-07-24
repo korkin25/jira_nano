@@ -73,15 +73,23 @@ Notes:
 
 ### 2.2 SQLite cache (derived, rebuildable)
 
-The cache mirrors ticket frontmatter into indexed tables so search, filtering,
-and board queries are fast without scanning every file. It holds no state that
-cannot be regenerated.
+The cache mirrors ticket frontmatter **and the user directory
+(`.jira_nano/users.yaml`)** into indexed tables so search, filtering, board
+queries, and identity lookups are fast without scanning every file. It holds no
+state that cannot be regenerated — the user directory, like tickets, is the
+source of record in Git and is only cached here for speed.
 
-- **Rebuild:** a full rebuild walks `tickets/*.md`, parses frontmatter, and
-  repopulates the tables. Triggered on demand, on cache-miss/version-mismatch,
-  and after external Git changes (e.g. `git pull`).
+- **Rebuild:** a full rebuild walks `tickets/*.md` **and `.jira_nano/`
+  (`users.yaml`, `workflow.yaml`)**, parses them, and repopulates the tables.
+  Triggered on demand, on cache-miss/version-mismatch, and after external Git
+  changes (e.g. `git pull`).
 - **Incremental update:** after a local write, the affected row is upserted so
   the cache stays hot without a full walk.
+- **Background sync:** a background task keeps the cache consistent with Git — it
+  compares the cache's last-synced commit SHA against the repo `HEAD`, diffs the
+  changed files via **pygit2**, and upserts them; it also picks up uncommitted
+  working-tree edits. This is what refreshes the cache after an external `git
+  pull` or an out-of-band edit.
 - **Consistency rule:** on any doubt (schema bump, corruption, divergence),
   discard and rebuild from Git. The cache never wins a conflict against the
   files.
@@ -196,7 +204,7 @@ may be adjusted per phase.
 | Telegram bot | aiogram | Bot API, webhook-driven. |
 | SQLite cache | stdlib `sqlite3` | Derived, rebuildable. |
 | Frontmatter | PyYAML / ruamel.yaml | Parse & serialize ticket YAML. |
-| Git store | `git` via subprocess (or pygit2) | One commit per change. |
+| Git store | **pygit2** (libgit2 bindings) | One commit per change; also powers the background cache sync (diff/status). |
 | Tooling | ruff, pytest, bandit, pip-audit | Already wired into CI. |
 | Env / distribution | `uv` for reproducible envs + `uv tool install`; single-file build (PyInstaller/shiv) evaluated later | Mitigates Python's weaker portability. |
 
