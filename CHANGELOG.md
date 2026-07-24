@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `JN-19`: comment pull-back (`jira_nano.telegram.pullback`) — a human topic
+  message is written back into the ticket as a comment (`source=telegram`, author
+  resolved from the directory); wired into the bot's message handler.
+  **Phase 3 (Telegram mirror) complete.**
 - `JN-18`: update posts (`jira_nano.telegram.updates`) — `format_event` renders a
   change-feed event and `post_events` posts each into its ticket's topic, skipping
   Telegram-sourced comments to avoid echoes.

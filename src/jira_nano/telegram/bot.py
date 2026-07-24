@@ -11,8 +11,10 @@ from aiogram import Bot, Dispatcher, Router
 from aiogram.types import Message
 
 from jira_nano.service import TicketService
+from jira_nano.users import UserDirectory
 
 from .config import TelegramConfig
+from .pullback import pull_back
 
 
 def build_bot(config: TelegramConfig) -> Bot:
@@ -23,13 +25,18 @@ def build_bot(config: TelegramConfig) -> Bot:
 def build_dispatcher(service: TicketService) -> Dispatcher:
     """Create the Dispatcher with the mirror router and in-process service access."""
     dispatcher = Dispatcher()
+    directory = UserDirectory.load(service.paths.config_dir)
     dispatcher["service"] = service
+    dispatcher["directory"] = directory
     router = Router(name="jira_nano")
 
     @router.message()
     async def on_message(message: Message) -> None:
         # JN-19: pull human comments written in Telegram back into ticket files.
-        return None
+        if message.message_thread_id is None or message.text is None or message.from_user is None:
+            return
+        username = message.from_user.username or str(message.from_user.id)
+        pull_back(service, directory, message.message_thread_id, username, message.text)
 
     dispatcher.include_router(router)
     return dispatcher
