@@ -109,7 +109,7 @@ Tools are Jira-named (`jira_create_issue`, `jira_search`, `jira_transition_issue
 Configure credentials and run the server:
 
 ```bash
-export JIRA_NANO_TOKENS="alice:s3cret,bob:hunter2"      # username:token pairs
+export JIRA_NANO_TOKENS="alice:$JIRA_NANO_TOKEN,bob:hunter2"      # username:token pairs
 export JIRA_NANO_OAUTH_CLIENTS="ci-bot:clientsecret"     # optional OAuth2 clients
 export JIRA_NANO_HTTP_HOST=0.0.0.0                       # default (all interfaces); set 127.0.0.1 to restrict
 export JIRA_NANO_HTTP_PORT=8080                          # default
@@ -123,16 +123,16 @@ Call it like Jira (both `/rest/api/2/…` and `/rest/api/3/…`, plus `latest`):
 
 ```bash
 # Basic auth (username:token) or Bearer token:
-curl -u alice:s3cret http://127.0.0.1:8080/rest/api/2/issue/JN-1
-curl -H "Authorization: Bearer s3cret" \
+curl -u alice:$JIRA_NANO_TOKEN http://127.0.0.1:8080/rest/api/2/issue/JN-1
+curl -H "Authorization: Bearer $JIRA_NANO_TOKEN" \
      -X POST http://127.0.0.1:8080/rest/api/2/issue \
      -H "Content-Type: application/json" \
      -d '{"fields": {"summary": "From the API"}}'
 # JQL search:
-curl -u alice:s3cret "http://127.0.0.1:8080/rest/api/2/search?jql=status%20%3D%20todo"
+curl -u alice:$JIRA_NANO_TOKEN "http://127.0.0.1:8080/rest/api/2/search?jql=status%20%3D%20todo"
 # OAuth2 client-credentials -> bearer token:
 curl -X POST http://127.0.0.1:8080/oauth/token \
-     -d '{"grant_type":"client_credentials","client_id":"ci-bot","client_secret":"clientsecret"}'
+     -d '{"grant_type":"client_credentials","client_id":"ci-bot","client_secret":"$CLIENT_SECRET"}'
 ```
 
 ## 7. Telegram bot mirror

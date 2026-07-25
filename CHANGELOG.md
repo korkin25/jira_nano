@@ -19,7 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   portability section. Added a **doc-sync** CI guard (`.github/workflows/doc-sync.yml`),
   **Dependabot**, **pre-commit** (gitleaks via Docker only), **CODEOWNERS**, PR/issue
   templates, `SECURITY.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `GitVersion.yml`, and a
-  `.gitlab-ci.yml` mirror (using `open_ci_cd/templates`).
+  `.gitlab-ci.yml` mirror (using `open_ci_cd/templates`). The install-guide curl examples now
+  use `$JIRA_NANO_TOKEN`/`$CLIENT_SECRET` placeholders instead of literal fake secrets, so the
+  newly-added gitleaks gate stays clean.
 - **JN-46 — container image, Helm chart & GHCR publishing.** Multi-stage
   `Dockerfile` (non-root uid 10000; default serves the HTTP Jira REST API on
   :8080), `docker-compose.yml` (init + API + optional bot/mcp-http profiles), and
