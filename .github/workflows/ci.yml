@@ -1,17 +1,28 @@
-# CI for jira_nano.
+# -----------------------------------------------------------------------------
+# CI — composed from the public reusable workflows in korkin25/open-ci-actions@v1.
+# -----------------------------------------------------------------------------
 #
-# Quality/security gates + artifact publishing to GHCR:
-#   lint-test  — ruff, mypy, pytest (3.11 & 3.12)
-#   quality    — radon/xenon code-quality assessment (complexity + maintainability); HARD gate
-#   security   — bandit, pip-audit, semgrep (SAST)
-#   iac-scan   — checkov, hadolint, trivy (config/fs misconfig)
-#   image      — build the Docker image, trivy-scan it, push to GHCR (main + tags)
-#   chart      — helm lint/template, package + push the OCI chart to GHCR (tags)
-#   build      — Python sdist/wheel on a version tag
+# Every job self-activates from the repository contents — jobs that do not apply
+# skip themselves, they do not fail, and they cost nothing. New shared jobs belong
+# in open-ci-actions, not here.
 #
-# Newly-added scanners run in report mode (soft-fail / continue-on-error) so they
-# surface findings without blocking; tighten them to hard gates once the baseline
-# is clean. Graduated so far: quality (radon/xenon) — JN-47.
+#   detect      inspects the checkout once and exports boolean-ish flags
+#   version     one SemVer (GitVersion) shared by the image and the chart
+#   python      ruff + mypy + pytest per interpreter, radon/xenon report
+#   sast        gitleaks, semgrep, bandit, pip-audit, checkov, hadolint, trivy-config
+#   docker      buildx build -> trivy scan -> push to GHCR on dev/rc/release and tags
+#   helm        lint + template always, package + OCI push to GHCR on tags
+#   functional  runs the repository's own auto-tests/group-a/validate-*.sh scripts
+#   quality     BESPOKE: the JN-47 xenon complexity HARD gate (the shared python
+#               job's xenon is only a soft trend signal, so we enforce it here)
+#
+# PyPI publishing is NOT wired here: it lives in the vendored `publish.yml`
+# (manual, workflow_dispatch). The reusable release workflow cannot trusted-publish
+# cross-repository (PyPI `job_workflow_ref` limitation), so a vendored workflow is
+# the supported pattern — see open-ci-actions release.yml header.
+#
+# Pinning: @v1 is a moving major tag (fixes and new inputs, no breaking changes).
+# -----------------------------------------------------------------------------
 name: CI
 
 on:
@@ -19,40 +30,147 @@ on:
     branches: ["**"]
     tags: ["v*"]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
-  packages: write
 
-env:
-  IMAGE: ghcr.io/${{ github.repository_owner }}/jira-nano
-  CHART_REPO: oci://ghcr.io/${{ github.repository_owner }}/charts
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  lint-test:
-    name: Lint & test
+  # ---------------------------------------------------------------------------
+  # 1. What kind of repository is this?
+  # ---------------------------------------------------------------------------
+  detect:
+    name: Detect
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.11", "3.12"]
+    outputs:
+      has-python: ${{ steps.detect.outputs.has-python }}
+      has-dockerfile: ${{ steps.detect.outputs.has-dockerfile }}
+      has-chart: ${{ steps.detect.outputs.has-chart }}
+      has-tests: ${{ steps.detect.outputs.has-tests }}
+      python-package-dir: ${{ steps.detect.outputs.python-package-dir }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - id: detect
+        uses: korkin25/open-ci-actions/actions/detect-project@v1
         with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev]"
-      - name: Ruff (lint)
-        run: ruff check .
-      - name: Mypy (type-check)
-        run: mypy
-      - name: Pytest
-        run: pytest -q
+          dockerfile: Dockerfile
+          chart-path: chart
+          tests-dir: auto-tests/group-a
+          # Only the functional smoke script — complexity-gate.sh is a quality gate,
+          # not a functional test, and runs in the bespoke `quality` job below.
+          tests-glob: "validate-*.sh"
 
+  # ---------------------------------------------------------------------------
+  # 2. One version for everything this pipeline publishes.
+  # ---------------------------------------------------------------------------
+  version:
+    name: Version
+    runs-on: ubuntu-latest
+    outputs:
+      semver: ${{ steps.gitversion.outputs.semver }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # required: GitVersion needs the full history
+      - id: gitversion
+        uses: korkin25/open-ci-actions/actions/gitversion@v1
+
+  # ---------------------------------------------------------------------------
+  # 3. Language gates — Python only.
+  # ---------------------------------------------------------------------------
+  python:
+    name: Python
+    needs: detect
+    if: needs.detect.outputs.has-python == 'true'
+    uses: korkin25/open-ci-actions/.github/workflows/python.yml@v1
+    with:
+      python-versions: '["3.11","3.12"]'
+      lint-paths: src
+      dev-extra: dev
+      pytest-args: -q
+
+  # ---------------------------------------------------------------------------
+  # 4. Security scanners — apply to every repository.
+  # ---------------------------------------------------------------------------
+  sast:
+    name: SAST
+    needs: detect
+    permissions:
+      contents: read
+      security-events: write
+    uses: korkin25/open-ci-actions/.github/workflows/sast.yml@v1
+    with:
+      has-python: ${{ needs.detect.outputs.has-python }}
+      has-dockerfile: ${{ needs.detect.outputs.has-dockerfile }}
+      bandit-target: src
+      dockerfile: Dockerfile
+      semgrep-configs: p/python p/security-audit p/secrets
+
+  # ---------------------------------------------------------------------------
+  # 5. Container image.
+  # ---------------------------------------------------------------------------
+  docker:
+    name: Image
+    needs: [detect, version]
+    if: needs.detect.outputs.has-dockerfile == 'true'
+    permissions:
+      contents: read
+      packages: write
+    uses: korkin25/open-ci-actions/.github/workflows/docker.yml@v1
+    with:
+      dockerfile: Dockerfile
+      image-name: jira-nano
+      version: ${{ needs.version.outputs.semver }}
+      push-branches: dev,rc,release
+      platforms: linux/amd64
+
+  # ---------------------------------------------------------------------------
+  # 6. Helm chart.
+  # ---------------------------------------------------------------------------
+  helm:
+    name: Chart
+    needs: [detect, version]
+    if: needs.detect.outputs.has-chart == 'true'
+    permissions:
+      contents: read
+      packages: write
+    uses: korkin25/open-ci-actions/.github/workflows/helm.yml@v1
+    with:
+      chart-path: chart
+      version: ${{ needs.version.outputs.semver }}
+
+  # ---------------------------------------------------------------------------
+  # 7. Functional tests — the repository's own scripts decide what "works" means.
+  # auto-tests/group-a/validate-deploy.sh boots the HTTP API and probes it with a
+  # bearer token (self-contained default token — no secret needed).
+  # ---------------------------------------------------------------------------
+  functional:
+    name: Functional
+    needs: [detect, docker]
+    if: >-
+      ${{ !cancelled()
+      && needs.detect.outputs.has-tests == 'true'
+      && needs.docker.result != 'failure' }}
+    uses: korkin25/open-ci-actions/.github/workflows/functional.yml@v1
+    with:
+      tests-dir: auto-tests/group-a
+      tests-glob: "validate-*.sh"
+      image-ref: ${{ needs.docker.outputs.image-ref }}
+
+  # ---------------------------------------------------------------------------
+  # 8. Bespoke: xenon complexity HARD gate (JN-47).
+  # The shared python job runs radon/xenon as a soft trend signal; this job is the
+  # merge blocker, with the project's agreed thresholds living in the script
+  # (single source of truth, runnable locally).
+  # ---------------------------------------------------------------------------
   quality:
-    name: Code quality (radon/xenon)
+    name: Code quality (xenon hard gate)
+    needs: detect
+    if: needs.detect.outputs.has-python == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -62,163 +180,4 @@ jobs:
       - name: Install radon/xenon
         run: pip install radon xenon
       - name: Complexity report + gate (hard)
-        # radon report + xenon hard gate — thresholds live in the script (single
-        # source of truth, runnable locally). Graduated from report mode in JN-47.
         run: bash auto-tests/group-a/complexity-gate.sh
-
-  security:
-    name: Security (bandit/pip-audit/semgrep)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Install (project + bandit only, keep pip-audit env clean)
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e .
-          pip install bandit pip-audit
-      - name: Bandit
-        run: bandit -c pyproject.toml -r src
-      - name: pip-audit (project env)
-        run: pip-audit
-      - name: Semgrep (SAST, isolated via pipx)
-        continue-on-error: true
-        run: pipx run semgrep scan --config p/python --config p/security-audit --error --skip-unknown-extensions
-
-  checkov:
-    name: Checkov (IaC misconfig)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Checkov (Dockerfile / GitHub Actions / secrets)
-        continue-on-error: true
-        run: |
-          pip install checkov
-          checkov -d . --framework dockerfile,github_actions,secrets --soft-fail --quiet
-
-  hadolint:
-    name: Hadolint (Dockerfile)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Hadolint
-        run: docker run --rm -i hadolint/hadolint:latest hadolint - < Dockerfile || true
-
-  trivy-config:
-    name: Trivy (config misconfig)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Trivy (Dockerfile/compose/helm/k8s)
-        continue-on-error: true
-        run: |
-          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b "$RUNNER_TEMP/bin"
-          "$RUNNER_TEMP/bin/trivy" config . --exit-code 0
-
-  image:
-    name: Docker image → GHCR
-    runs-on: ubuntu-latest
-    needs: [lint-test]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: docker/setup-buildx-action@v3
-      - name: Image metadata (tags)
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.IMAGE }}
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=sha
-            type=semver,pattern={{version}}
-            type=raw,value=latest,enable={{is_default_branch}}
-      - name: Build (load locally)
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: false
-          load: true
-          provenance: false
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-      - name: Trivy (image vulnerabilities, report)
-        continue-on-error: true
-        run: |
-          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b "$RUNNER_TEMP/bin"
-          "$RUNNER_TEMP/bin/trivy" image --exit-code 0 --ignore-unfixed "${IMAGE}:${{ steps.meta.outputs.version }}"
-      # Push only on main and version tags.
-      - name: Push to GHCR
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          while read -r t; do [ -n "$t" ] && docker push "$t"; done <<< "${{ steps.meta.outputs.tags }}"
-
-  chart:
-    name: Helm chart → GHCR
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: azure/setup-helm@v4
-      - name: Lint & template
-        run: |
-          helm lint chart
-          helm template t chart > /dev/null
-      - name: Package
-        run: helm package chart --destination /tmp/chart
-      - name: Push OCI chart (tags only)
-        if: startsWith(github.ref, 'refs/tags/v')
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io -u ${{ github.actor }} --password-stdin
-          helm push /tmp/chart/*.tgz ${{ env.CHART_REPO }}
-
-  functional:
-    name: Functional (HTTP API e2e)
-    runs-on: ubuntu-latest
-    # A minimal env comes from the GitHub Actions environment (variables/secrets).
-    environment: ci-functional
-    steps:
-      - uses: actions/checkout@v4
-      - name: Build image
-        run: DOCKER_BUILDKIT=1 docker build -t jira-nano:ci .
-      - name: Boot the API and exercise it with a token
-        env:
-          JIRA_NANO_TOKENS: ${{ vars.JIRA_NANO_TOKENS || 'ci:ci-functional-token' }}
-        run: |
-          docker run -d --name jn -p 8080:8080 -e JIRA_NANO_TOKENS="$JIRA_NANO_TOKENS" \
-            --entrypoint sh jira-nano:ci -c 'jira-nano --repo /data/repo init && exec jira-nano-http'
-          for i in $(seq 1 20); do
-            code=$(curl -s -o /dev/null -w '%{http_code}' localhost:8080/rest/api/2/myself || true)
-            [ "$code" != "000" ] && break; sleep 1
-          done
-          tok="${JIRA_NANO_TOKENS##*:}"
-          code=$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $tok" localhost:8080/rest/api/2/myself)
-          echo "authenticated GET /rest/api/2/myself -> $code"
-          docker logs jn | tail -15
-          docker rm -f jn >/dev/null 2>&1 || true
-          test "$code" = "200"
-
-  build:
-    name: Build distribution (on tag)
-    runs-on: ubuntu-latest
-    needs: [lint-test, security]
-    if: startsWith(github.ref, 'refs/tags/v')
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Build
-        run: |
-          python -m pip install --upgrade pip build
-          python -m build
-      - name: Upload dist
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist
-          path: dist/*

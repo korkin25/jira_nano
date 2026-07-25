@@ -76,3 +76,7 @@ coverage.xml
 *.swo
 .DS_Store
 Thumbs.db
+
+# Claude Code personal (local) settings — never commit
+.claude/settings.local.json
+.claude/worktrees/

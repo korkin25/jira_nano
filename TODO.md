@@ -2,6 +2,18 @@
 
 ## Current state / next action
 
+**JN-51 in progress** (2026-07-26): **adopt the `ai-project-template` engineering standard**
+(feature #51). Branch model migrated `main` → `dev`/`rc`/`release` (`dev` is default; `main`
+kept as legacy). Done on branch `feature/JN-51-full-standard` off `dev`: CI recomposed on
+`korkin25/open-ci-actions@v1` (+ bespoke `quality` job keeping the JN-47 xenon hard gate),
+`GitVersion.yml`, inline HTTP-API e2e → script-driven `auto-tests/group-a/validate-deploy.sh`,
+universal agent-rule symlinks + `.claude/settings.json` hook + `.cursor/rules/project.mdc`,
+`CLAUDE.md` hardened (context-map router / Versioning / Safe-autonomy / Agent-security /
+Design-before-code / cross-agent portability), `doc-sync.yml`, Dependabot, pre-commit
+(gitleaks-only), CODEOWNERS, PR/issue templates, SECURITY/CONTRIBUTING/CoC, `.gitlab-ci.yml`.
+PyPI stays in the vendored `publish.yml`. **Next:** push branch → PR to `dev` → analyze CI logs
+(even if green) → merge with `--no-ff` once green.
+
 **JN-47 done** (2026-07-25): xenon complexity gate graduated to a **hard CI gate**
 (was `continue-on-error` and silently failing on `main`). `githost/github.py`
 refactored (`parse_github` C(14)→A(4) via `_parse_pull_request`/`_parse_push`),
