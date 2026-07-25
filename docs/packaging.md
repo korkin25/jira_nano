@@ -58,11 +58,15 @@ Python has no static binary by default. For a self-contained artifact, a
 single-file build via **PyInstaller** or **shiv** can be produced from the wheel
 in a later step; for now `uv tool install` / `pipx` give reproducible installs.
 
-## Publishing to PyPI (separate, explicit step)
+## Publishing to PyPI (merge to `rc`/`release`, no tags)
 
 `pipx install jira-nano` pulls from **PyPI**, so the package has to be published
-there first. Publishing is intentionally a manual, explicit step (never on every
-tag). **One-time setup — done by the maintainer:**
+there first. Publishing follows the shared release standard: a **merge IS the
+release** — there are no git tags. The vendored `.github/workflows/release.yml`
+runs `on: push: branches: [rc, release]` and publishes the version computed by
+**GitVersion** (`GitVersion.yml`): a merge to `rc` publishes a **pre-release**
+(`X.Y.ZrcN`), a merge to `release` publishes the **stable** `X.Y.Z`. **One-time
+setup — done by the maintainer:**
 
 1. **Register** at <https://pypi.org> — verify your email and enable 2FA. Check
    that the name `jira-nano` is available (pick another if it is taken).
@@ -70,9 +74,11 @@ tag). **One-time setup — done by the maintainer:**
    repo). On PyPI → *Your projects* → *Publishing* → add a **pending GitHub
    publisher**:
    - Owner: `korkin25` · Repository: `jira_nano`
-   - Workflow: `publish.yml` · Environment: `pypi`
-3. **Publish**: GitHub → *Actions* → **Publish to PyPI** → *Run workflow* (on the
-   tag you want to release). The workflow builds and uploads via OIDC.
+   - Workflow: `release.yml` · Environment: `pypi`
+3. **Publish**: merge `dev` → `rc` (pre-release) or `dev` → `rc` → `release`
+   (stable). `release.yml` derives the version from GitVersion, runs
+   `hatch version <semver>`, builds, and uploads via OIDC — no manual dispatch and
+   no version is ever hand-written.
 
 Prefer the command line with an API token instead of Trusted Publishing:
 
