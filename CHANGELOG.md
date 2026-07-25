@@ -39,6 +39,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **JN-52 — tamed Dependabot noise + doc-sync exemption.** The `doc-sync` guard now skips
+  dependency PRs (the `dependencies` label / `dependabot[bot]` actor) — a version bump carries
+  no doc change and should not be forced to fake one. `dependabot.yml` now opens **one grouped
+  PR per ecosystem** and **ignores breaking major bumps**; only minor/patch updates are proposed
+  (majors are a deliberate migration task, not a red auto-PR).
 - **JN-51 — CI is now a composition, and the branch model moved to `dev`/`rc`/`release`.**
   `.github/workflows/ci.yml` is wiring only — every job `uses:` a reusable workflow from
   `korkin25/open-ci-actions@v1` (`detect` → `version` → `python` / `sast` / `docker` / `helm` /
