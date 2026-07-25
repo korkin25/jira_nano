@@ -16,10 +16,11 @@
 #   quality     BESPOKE: the JN-47 xenon complexity HARD gate (the shared python
 #               job's xenon is only a soft trend signal, so we enforce it here)
 #
-# PyPI publishing is NOT wired here: it lives in the vendored `publish.yml`
-# (manual, workflow_dispatch). The reusable release workflow cannot trusted-publish
-# cross-repository (PyPI `job_workflow_ref` limitation), so a vendored workflow is
-# the supported pattern — see open-ci-actions release.yml header.
+# PyPI publishing is NOT wired here: it lives in the vendored `release.yml`
+# (triggered on push to `rc`/`release` — a merge IS the release, no git tags). The
+# reusable release workflow cannot trusted-publish cross-repository (PyPI
+# `job_workflow_ref` limitation), so a vendored workflow is the supported pattern —
+# see open-ci-actions release.yml header.
 #
 # Pinning: @v1 is a moving major tag (fixes and new inputs, no breaking changes).
 # -----------------------------------------------------------------------------

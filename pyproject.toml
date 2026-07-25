@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "jira-nano"
-version = "0.5.0"
+dynamic = ["version"]
 description = "A lightweight, AI-native, git-backed issue tracker."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -45,6 +45,9 @@ dev = [
     "pip-audit>=2.7",
     "types-pyyaml",
 ]
+
+[tool.hatch.version]
+path = "src/jira_nano/__init__.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/jira_nano"]

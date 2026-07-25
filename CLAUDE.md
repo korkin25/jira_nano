@@ -73,6 +73,7 @@ agents can manage tickets natively. Status: **released** — versions live in
   **Current** (in progress) · **Planned** · **Brainstorm** (ideas) · **Delivered**.
 - A new idea from the user lands here first (as Brainstorm or Planned) before it
   becomes a task in `TODO.md`.
+- `Features.md` lists **only user-facing product features** — what the software does for its users. **Never** put engineering/infra tasks there (deployment, CI/CD, release, versioning, tooling, refactors, governance) — those live in `TODO.md`/`CHANGELOG.md`. Remove any such entry from `Features.md`.
 
 ## Documentation sync (apply without being asked)
 
@@ -99,7 +100,9 @@ Keep docs in lockstep with the code, **in the same change** — never wait to be
 
 - **(a) Fully automated** — unit/integration tests plus all debugging. Run in
   GitHub Actions CI on every push/PR. Claude **must read and analyze the CI run
-  logs** (`gh run view --log`) for every run — **even when the job is green**.
+  logs** (`gh run view --log`) for every run — **even when the job is green**. When a run
+  fails, **quote the actual failing log fragment back to the user** (the real error lines, not
+  just a paraphrase) so a human can follow the diagnosis — then explain the cause and fix.
 - **(b) Dev-machine / AI-sandbox** — tests runnable only on a developer machine or
   against external services (live Telegram bot, GitLab/GitHub webhooks, the MCP /
   HTTP server end-to-end) or not fully automatable, run in an **isolated sandbox
@@ -132,21 +135,39 @@ Keep docs in lockstep with the code, **in the same change** — never wait to be
 - After a release (full CI green) Claude re-runs group-(b); any remaining group-(c)
   tests → methodology handed to the user.
 
-## Versioning (auto-generated — never hardcode)
+## Versioning & releasing (auto-generated — never hardcode, no tags)
 
-The version is produced by **GitVersion** (`GitVersion.yml`) — the single source of truth for
-the image tag, Helm chart, PyPI package, and any version written into docs. Branch model:
-`feature/*` (`-alpha`) → `dev` (`-dev`) → `rc` (`-rc`) → `release`. **There is no `main` branch**
-(the legacy `main` is kept only for history).
+**One source of truth: GitVersion** (`GitVersion.yml`). It computes the SemVer for *everything*
+— the container image, the Helm chart, and the published PyPI package — from the branch
+graph. Branch model: `feature/*` (`-alpha`) → `dev` (`-dev`) → `rc` (`-rc`) → `release` (clean
+`X.Y.Z`). **There is no `main` branch, and there are no git tags.**
 
-- CI derives artifact versions from GitVersion automatically (the GitHub `version` job runs
-  GitVersion; the GitLab mirror uses the shared auto-semversioning template). CI and docs
-  therefore agree on one number.
-- **Never hand-write a version.** When you must state one in docs, release notes, or examples,
-  compute it via Docker (no local install needed) —
-  `docker run --rm -v "$PWD:/repo" gittools/gitversion:6.3.0 /repo /showvariable SemVer` — or
-  read the CI's GitVersion output. Prefer wording like "the current release" over a number that
-  will go stale.
+- **The one knob is `next-version` in `GitVersion.yml`.** It sets the target release number. To
+  cut a new minor/major, bump `next-version`; patches increment automatically on `release`.
+- **Never hand-write a version** — not in `pyproject.toml`, not in `src/jira_nano/__init__.py`,
+  not in docs. `pyproject.toml` declares the version *dynamic* (reading
+  `src/jira_nano/__init__.py`, which holds a `0.0.0` placeholder); `release.yml` injects the
+  GitVersion number at publish time. When you must state the version in docs, read it from CI's
+  GitVersion output or
+  `docker run --rm -v "$PWD:/repo" gittools/gitversion:6.3.0 /repo /showvariable SemVer`.
+
+**Releasing is a merge, not a tag.** `release.yml` runs `on: push: branches: [rc, release]` —
+a merge into either branch IS a release:
+
+- merge to **`rc`** → a **pre-release** publish (PyPI `X.Y.ZrcN`). GitVersion gives the `rc`
+  label + number.
+- merge to **`release`** → the **stable** publish (clean `X.Y.Z`, from GitVersion's
+  `MajorMinorPatch`).
+
+To cut a new number, bump `next-version`; then merge `dev` → `rc` → `release` (approval-gated).
+`ci.yml` never publishes the package. **Uses the latest GitVersion 6.x** — the config
+must be 6.x-native (a 5.x-style config makes `next-version` fail to parse).
+
+- **Python** (this repo): `pyproject.toml` is `dynamic = ["version"]` reading
+  `src/jira_nano/__init__.py`; `release.yml` does `hatch version <gitversion>` then builds and
+  publishes to **PyPI via Trusted Publishing** (OIDC, no stored token). One-time PyPI setup: add
+  a Trusted Publisher for the project bound to this repo, workflow `release.yml`, environment
+  `pypi`.
 
 ## Build, artifacts & CI (apply without being asked)
 
@@ -159,9 +180,10 @@ gate set; a version tag `v*` publishes the release artifacts.
 (`detect` → `version` → `python` / `sast` / `docker` / `helm` / `functional`), plus one
 bespoke `quality` job that enforces the JN-47 xenon complexity **hard gate**
 (`auto-tests/group-a/complexity-gate.sh`; the shared python job's xenon is a soft trend
-signal only). PyPI publishing is **not** in `ci.yml` — it is the vendored `publish.yml`
-(manual `workflow_dispatch`), because the reusable release workflow cannot trusted-publish
-cross-repository. The GitLab mirror uses `open_ci_cd/templates`. **New shared CI logic
+signal only). PyPI publishing is **not** in `ci.yml` — it is the vendored `release.yml`
+(triggered `on: push: branches: [rc, release]`; see *Versioning & releasing*), because the
+reusable release workflow cannot trusted-publish cross-repository. The GitLab mirror uses
+`open_ci_cd/templates`. **New shared CI logic
 belongs in `open-ci-actions`, not in this repo.** The gates below describe what those
 reusable workflows run.
 
@@ -176,9 +198,10 @@ reusable workflows run.
 
 **Published artifacts — all to the GitHub Container Registry (GHCR):**
 
-- Python sdist+wheel → PyPI (pipx-installable) on a tag (trusted publishing).
-- Docker image → `ghcr.io/<owner>/jira-nano` — built every push, pushed on `dev`/`rc`/`release`
-  and tags. The version tag comes from GitVersion (see *Versioning*).
+- Python sdist+wheel → PyPI (pipx-installable) on merge to `rc`/`release` (trusted publishing;
+  see *Versioning & releasing*) — `rc` publishes a pre-release, `release` the clean version.
+- Docker image → `ghcr.io/<owner>/jira-nano` — built every push, pushed on `dev`/`rc`/`release`.
+  The image tag comes from GitVersion (see *Versioning & releasing*).
 - Helm chart (OCI) → `ghcr.io/<owner>/charts/jira-nano` — linted every push,
   pushed on tags.
 
@@ -197,9 +220,9 @@ This project is developed by an AI agent under continuous, autonomous iteration.
 - **Design before code (MANDATORY).** No implementation — not even tests — begins until the design is finished. "Finished" means the approach is written down (in `docs/architecture.md` or the ticket): the data model, the public API/contract (HTTP/MCP surface), the deployment shape, the affected components, and the trade-offs of the chosen option vs. alternatives. Any **architectural** decision in that design must be approved by the user before coding starts (consult on it explicitly). For a trivial change the design may be a sentence — but it is still written before code. If mid-implementation you discover the design was wrong, stop, revise the design, then resume.
 - Continuous development: while open bugs or features remain (see `Features.md` / `TODO.md`), keep implementing autonomously through the per-task lifecycle below. Consult the user ONLY for architectural decisions — topology, data model, public API/contract, deployment shape, dependency/stack choices.
 - Test-driven: for every agreed feature write the tests FIRST (they must fail), then implement until green. No feature code without a test.
-- Feature branches: work on `feature/JN-<n>-<slug>` off `dev`; merge to `dev` only when the full suite is green. Promote `dev` → `rc` → `release` by merging forward. **There is no `main` branch** (see *Versioning*).
+- Feature branches: work on `feature/JN-<n>-<slug>` off `dev`; merge to `dev` only when the full suite is green. Promote `dev` → `rc` → `release` by merging forward. **There is no `main` branch** (see *Versioning & releasing*).
 - Commit periodically in small logical units, Conventional Commits (feat:, fix:, test:, docs:, chore:, ci:). Never add a Co-Authored-By trailer. Push to `origin` after every commit.
-- Versions are **auto-generated** by GitVersion — never hardcode a version (see *Versioning*). Releases are cut from `release`; publishing to PyPI or marketplaces is a separate, later, explicit step (the vendored `publish.yml`).
+- Versions are **auto-generated** by GitVersion — never hardcode a version (see *Versioning & releasing*). There are no git tags: a merge to `rc` or `release` IS the release, and the vendored `release.yml` publishes to PyPI from that merge (`rc` → pre-release, `release` → stable).
 - CI on every push (GitHub Actions): the full gate set above. A tag triggers the publish jobs.
 - Security first: no secrets in git; least privilege; treat the Telethon session / bot token as full-access credentials.
 - High bar: type hints, docstrings, ruff-clean, meaningful tests. Work like a top-tier engineer + DevOps.

@@ -39,6 +39,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **JN-53 — adopted the shared release standard (merge-to-publish, no tags).** Releasing is
+  now a **merge, not a tag**: the new vendored `.github/workflows/release.yml` runs
+  `on: push: branches: [rc, release]` — a merge to `rc` publishes a **PyPI pre-release**
+  (`X.Y.ZrcN`), a merge to `release` publishes the clean stable `X.Y.Z`. The version comes
+  entirely from **GitVersion** via a clean **6.x-native `GitVersion.yml`** (single knob
+  `next-version`, no `tag-prefix`, no git tags — the old BNPL-style 5.x config that broke
+  `next-version` parsing under GitVersion 6.8+ is gone). `pyproject.toml` moved from a **static
+  `version`** to `dynamic = ["version"]` reading `src/jira_nano/__init__.py` (a `0.0.0`
+  placeholder); `release.yml` injects the GitVersion number with `hatch version <semver>` at
+  publish time. The manual-dispatch `publish.yml` is **removed**, superseded by `release.yml`.
+  `CLAUDE.md` gains the **Versioning & releasing** section and a **`Features.md` scope rule**
+  (only user-facing product features belong there; engineering/infra tasks live in
+  `TODO.md`/`CHANGELOG.md`) — the infra feature entry #51 was moved out of `Features.md`.
 - **JN-52 — tamed Dependabot noise + doc-sync exemption.** The `doc-sync` guard now skips
   dependency PRs (the `dependencies` label / `dependabot[bot]` actor) — a version bump carries
   no doc change and should not be forced to fake one. `dependabot.yml` now opens **one grouped

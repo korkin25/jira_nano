@@ -11,7 +11,8 @@ universal agent-rule symlinks + `.claude/settings.json` hook + `.cursor/rules/pr
 `CLAUDE.md` hardened (context-map router / Versioning / Safe-autonomy / Agent-security /
 Design-before-code / cross-agent portability), `doc-sync.yml`, Dependabot, pre-commit
 (gitleaks-only), CODEOWNERS, PR/issue templates, SECURITY/CONTRIBUTING/CoC, `.gitlab-ci.yml`.
-PyPI stays in the vendored `publish.yml`. **Next:** push branch → PR to `dev` → analyze CI logs
+PyPI publishing is the vendored release workflow (`release.yml`, merge to `rc`/`release`; the
+former `publish.yml` was retired by JN-53). **Next:** push branch → PR to `dev` → analyze CI logs
 (even if green) → merge with `--no-ff` once green.
 
 **JN-47 done** (2026-07-25): xenon complexity gate graduated to a **hard CI gate**
