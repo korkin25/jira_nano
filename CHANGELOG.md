@@ -39,6 +39,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **JN-54 — stable releases now cut a GitHub Release.** `release.yml` gains a final
+  `GitHub Release (stable only)` step, gated `if: github.ref_name == 'release'`, that tags
+  `vX.Y.Z` at the merge commit and cuts a GitHub Release with auto-generated notes and the
+  built sdist+wheel attached (`gh release create ... --generate-notes dist/*`); the job's
+  `contents` permission was raised from `read` to `write` for it. A merge to `rc` stays
+  **registry-only** — a PyPI pre-release with **no tag**, so pre-release tags never confuse
+  GitVersion. Mirrors the canonical `ai-project-template` release workflow.
 - **JN-53 — adopted the shared release standard (merge-to-publish, no tags).** Releasing is
   now a **merge, not a tag**: the new vendored `.github/workflows/release.yml` runs
   `on: push: branches: [rc, release]` — a merge to `rc` publishes a **PyPI pre-release**
