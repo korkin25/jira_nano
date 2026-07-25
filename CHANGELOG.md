@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **JN-51 — adopt the `ai-project-template` engineering standard (feature #51).** Universal
+  agent-rule pickup: `CLAUDE.md` is the single source and `AGENTS.md`, `GEMINI.md`,
+  `.cursorrules`, `.clinerules`, `.windsurfrules`, `.github/copilot-instructions.md` are
+  symlinks to it, with `.cursor/rules/project.mdc` as a thin pointer and a per-turn
+  `.claude/settings.json` hook re-injecting the context map. `CLAUDE.md` gained the
+  **Start-here context-map router**, **Versioning** (GitVersion), **Safe autonomy**,
+  **Agent security working agreements**, **Design-before-code**, and the cross-agent
+  portability section. Added a **doc-sync** CI guard (`.github/workflows/doc-sync.yml`),
+  **Dependabot**, **pre-commit** (gitleaks via Docker only), **CODEOWNERS**, PR/issue
+  templates, `SECURITY.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `GitVersion.yml`, and a
+  `.gitlab-ci.yml` mirror (using `open_ci_cd/templates`).
 - **JN-46 — container image, Helm chart & GHCR publishing.** Multi-stage
   `Dockerfile` (non-root uid 10000; default serves the HTTP Jira REST API on
   :8080), `docker-compose.yml` (init + API + optional bot/mcp-http profiles), and
@@ -26,6 +37,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **JN-51 — CI is now a composition, and the branch model moved to `dev`/`rc`/`release`.**
+  `.github/workflows/ci.yml` is wiring only — every job `uses:` a reusable workflow from
+  `korkin25/open-ci-actions@v1` (`detect` → `version` → `python` / `sast` / `docker` / `helm` /
+  `functional`), plus one bespoke `quality` job that preserves the JN-47 xenon **hard gate**
+  (`complexity-gate.sh`). The old inline HTTP-API e2e job became the script-driven
+  `auto-tests/group-a/validate-deploy.sh` (build image → boot `jira-nano-http` → authenticated
+  probe; exit 0/77/other; probe host portable across GitHub and GitLab DinD). PyPI publishing
+  stays in the vendored `publish.yml` (the reusable release workflow can't trusted-publish
+  cross-repository). The old `main` branch is retired in favour of `feature/*` → `dev` → `rc` →
+  `release`; `dev` is the default branch and versions come from GitVersion.
 - **JN-47 — xenon complexity gate graduated to a hard CI gate.** The radon/xenon
   `quality` job is no longer `continue-on-error`: `xenon --max-absolute C
   --max-modules B --max-average A src` now blocks the build. To clear the baseline,

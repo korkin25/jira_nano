@@ -7,7 +7,17 @@ New requests and ideas land here first, then become tasks in [TODO.md](TODO.md).
 
 ## Current (in progress)
 
-_None._
+51. **Adopt the `ai-project-template` engineering standard (JN-51).** Align this repo with the
+    shared reference template: CI as a **composition of `korkin25/open-ci-actions@v1`** (detect →
+    version → python/sast/docker/helm/functional) plus a bespoke `quality` job that keeps the
+    JN-47 xenon **hard gate**; **GitVersion** auto-versioning; branch model **`feature/*` →
+    `dev` → `rc` → `release`** (retire `main`); the inline HTTP-API e2e converted to the
+    script-driven `auto-tests/group-a/validate-deploy.sh`; universal agent-rule pickup
+    (`CLAUDE.md` single-source with symlinked `AGENTS.md`/`GEMINI.md`/`.cursorrules`/… + Cursor
+    MDC pointer + per-turn hook); **doc-sync CI guard**, Dependabot, pre-commit (gitleaks-only),
+    CODEOWNERS, PR/issue templates, `SECURITY.md`/`CONTRIBUTING.md`/`CODE_OF_CONDUCT.md`; and a
+    `.gitlab-ci.yml` mirror on `open_ci_cd/templates`. Governance doc gains **Design-before-code**,
+    **Safe-autonomy** and **Agent-security** sections. PyPI stays in the vendored `publish.yml`.
 
 ## Planned
 
