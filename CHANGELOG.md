@@ -39,6 +39,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **JN-55 — eliminated `Features.md`; features now live in `README.md`.** The delivered,
+  **user-facing** feature list moved into a `## Features` section of `README.md` (the file
+  PyPI renders), and the not-yet-built backlog/ideas moved to a **Planned / ideas** area in
+  `TODO.md`; `Features.md` was deleted. `CLAUDE.md` (context-map router, doc-sync table, the
+  former "Feature backlog" section → **Features — `README.md`**, and the Per-task lifecycle
+  "Backlog" step), the `.claude/settings.json` context-map hook, `.cursor/rules/project.mdc`,
+  the PR/feature-request templates, and the `doc-sync.yml` docs regex were all repointed to
+  `README.md` `## Features` / `TODO.md`. The scope rule stands — `README.md` `## Features`
+  carries only user-facing product features; deployment/CI/release/versioning/tooling/
+  refactors/governance stay in `CHANGELOG.md`/`TODO.md`.
 - **JN-54 — stable releases now cut a GitHub Release.** `release.yml` gains a final
   `GitHub Release (stable only)` step, gated `if: github.ref_name == 'release'`, that tags
   `vX.Y.Z` at the merge commit and cuts a GitHub Release with auto-generated notes and the

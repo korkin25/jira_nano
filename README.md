@@ -43,20 +43,35 @@ email. `jira_nano` inverts that:
 
 ## Features
 
-Highlights below; the full numbered list is in
-[`Features.md`](Features.md).
-
-- Git-backed ticket store: one Markdown file per ticket with YAML frontmatter.
-- Rebuildable SQLite cache for fast search, filters, and boards.
-- Telegram bot mirror: assignment `@mentions`, status icons, update posts, and
-  comment pull-back.
-- MCP server + HTTP API: `create` / `update` / `transition` / `assign` /
-  `comment` / `search` / `list` / `board`.
-- Git-host integration for **both GitLab and GitHub**: link commits and MRs/PRs
-  to tickets, update status on events.
-- Shipped as an Agent Skill (`SKILL.md`) for OpenClaw / Claude / other agents.
-- Configurable, validated status workflow (draft — see
+- **Git-backed ticket store** — one Markdown file per ticket (`tickets/JN-<n>.md`) with
+  YAML frontmatter (`id`, `title`, `status`, `assignee`, `labels`, `priority`, dates,
+  `links`) plus a Markdown body; Git history is the audit trail, and ids are sequential and
+  never reused.
+- **Rebuildable SQLite cache** — indexes ticket frontmatter for fast full-text and field
+  search, filters (status/assignee/label/priority), and board views; regenerated from the
+  ticket files at any time and never authoritative.
+- **CRUD & search** — create, read, and update tickets through one shared service layer,
+  with cache-backed search, filtered lists, and a board grouped by workflow status.
+- **Configurable, validated workflow** — states and allowed transitions live in config;
+  every mutating operation is validated against them; terminal states archive/close a
+  ticket; status is mirrored to Telegram icons (see
   [`docs/status-model.md`](docs/status-model.md)).
+- **MCP server + HTTP API** — `create` / `update` / `transition` / `assign` / `comment` /
+  `search` / `list` / `board`, with a tool shape close to common Jira MCP servers, plus a
+  drop-in Jira REST v2+v3 HTTP surface for non-MCP clients.
+- **Telegram bot mirror** — a multi-user **Bot API** bot (not a userbot) manages a forum
+  topic/thread per ticket, `@mention`s assignees, reflects status via icons, posts ticket
+  updates, and pulls human comments written in Telegram back into the ticket files.
+  Post-1.0 polish adds a message-design overhaul, a background auto-trigger, per-status
+  banners, and voice-message transcription (pluggable STT — local Whisper by default,
+  optional cloud).
+- **Git-host integration (GitLab + GitHub)** — parse `JN-<n>` ids in commit messages and
+  MR/PR titles across both hosts symmetrically, link commits and MRs/PRs into the ticket
+  `links`, and advance ticket status on Git-host events (webhook-driven with polling
+  fallback).
+- **Agent Skill packaging** — shipped as an Agent Skill (`SKILL.md`) targeting the
+  [Agent Skills](https://agentskills.io) standard, so agents (OpenClaw / Claude / others)
+  manage tickets natively via the skill + MCP.
 
 ## How it works
 

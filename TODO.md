@@ -30,8 +30,9 @@ CI gains checkov/hadolint/trivy/semgrep/radon-xenon + pushes image & OCI chart t
 
 **JN-45 done** (2026-07-25): governance docs mirrored with `tg_notes` — `CLAUDE.md` now
 carries the Documentation-sync table, the Testing policy (groups a/b/c, TDD-first, release
-gate) and the extended MANDATORY Per-task lifecycle; features moved to root `Features.md`;
-`docs/tests.md` + `auto-tests/` scaffolds added. In `CHANGELOG.md` (`[Unreleased]`).
+gate) and the extended MANDATORY Per-task lifecycle; delivered features surfaced in
+`README.md` `## Features`; `docs/tests.md` + `auto-tests/` scaffolds added. In `CHANGELOG.md`
+(`[Unreleased]`).
 
 **Project initialized:** documentation, rules, and non-code skeleton are in
 place (`CLAUDE.md`, `README.md`, `docs/`, `CHANGELOG.md`, `LICENSE`,
@@ -119,6 +120,24 @@ explicit step — `uv publish`, installs via `pipx`).
 - Local work items use `JN-<n>`; decisions use `JN-D<n>`.
 - Numbering is **mandatory**, sequential, and **never reused** — a retired id
   stays retired.
+
+## Planned / ideas
+
+Backlog carried over from the former root feature backlog (numbers are its old stable ids;
+the delivered set now lives in `README.md` `## Features`, and the decision rationale is under
+**Not built** below):
+
+- **37 Worklogs / time tracking** — deferred to v2 (`JN-D6`).
+- **38 Sprints & agile boards** — deferred to v2 (`JN-D6`).
+- **39 Versions / releases** — deferred to v2 (`JN-D6`).
+- **40 Attachments** — files-in-git story, deferred to v2 (`JN-D6`).
+- **41 Jira-compat field metadata** — `createmeta`/`editmeta`, projects/components, and
+  generic issue links (blocks/relates) beyond `parent`; currently minimal/absent.
+- **42 OAuth 2.0 authorization-code flow** — only `client_credentials` is implemented, plus
+  fuller Markdown↔ADF node coverage (common nodes only today).
+- **43 Single-file build** — PyInstaller/shiv, evaluated, not built (`JN-D2`).
+- **44 JSM / service desk surface** (idea) — service-desk, proforma forms, SLA, and the other
+  Atlassian products; out of scope for now (`JN-D6`).
 
 ## Not built (by decision — future work)
 
